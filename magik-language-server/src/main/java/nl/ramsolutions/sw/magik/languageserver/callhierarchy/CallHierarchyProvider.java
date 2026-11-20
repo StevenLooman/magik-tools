@@ -3,15 +3,19 @@ package nl.ramsolutions.sw.magik.languageserver.callhierarchy;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
@@ -20,6 +24,7 @@ import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -52,6 +57,9 @@ public class CallHierarchyProvider {
   static final String DATA_TYPE_STRING = "typeString";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CallHierarchyProvider.class);
+
+  private static final Set<MethodUsageLocator.Option> INCOMING_OPTIONS =
+      Set.of(MethodUsageLocator.Option.DECLARED_USAGES, MethodUsageLocator.Option.PROCEDURE_USAGES);
 
   private final IDefinitionKeeper definitionKeeper;
   private final List<CallHierarchyModule> modules;
@@ -124,37 +132,59 @@ public class CallHierarchyProvider {
 
     final MethodUsageLocator methodUsageLocator = new MethodUsageLocator(this.definitionKeeper);
     final MethodUsage searchedMethodUsage = new MethodUsage(typeString, methodName);
-    return methodUsageLocator.getMethodUsages(searchedMethodUsage).stream()
-        .map(
-            entry -> {
-              final MethodUsage usage = entry.getKey();
-
-              final Location location = usage.getLocation();
-              Objects.requireNonNull(location);
-              final AstNode usageNode = usage.getNode();
-              Objects.requireNonNull(usageNode);
-
-              // Construct the CallHierarchyItem/CallHierarchyIncomingCall for
-              // method/procedure definition.
-              final URI calledMethodUri = location.getUri();
-              final String uriStr = calledMethodUri.toString();
-              final AstNode definitionNode = AstQuery.getEnclosingCallableNode(usageNode);
-              if (definitionNode == null) {
-                return null;
-              } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
-                return this.createIncomingCallForMethod(usageNode, uriStr, definitionNode);
-              } else if (definitionNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-                return this.createIncomingCallForProcedure(usageNode, uriStr, definitionNode);
-              }
-
-              throw new IllegalStateException("Unknown thing");
-            })
+    return methodUsageLocator.getMethodUsages(searchedMethodUsage, INCOMING_OPTIONS).stream()
+        .map(Map.Entry::getKey)
+        .map(this::createIncomingCall)
         .filter(Objects::nonNull)
         .toList();
   }
 
+  /**
+   * Create the incoming call for a usage: from the definition enclosing a call site, or from the
+   * definition that declares the usage with an {@code @invokes_method} annotation.
+   */
+  @CheckForNull
+  private CallHierarchyIncomingCall createIncomingCall(final MethodUsage usage) {
+    final Location location = usage.getLocation();
+    Objects.requireNonNull(location);
+    final AstNode usageNode = usage.getNode();
+    Objects.requireNonNull(usageNode);
+
+    final URI calledMethodUri = location.getUri();
+    final String uriStr = calledMethodUri.toString();
+    // A declared usage sits on its definition; its enclosing callable is another definition.
+    final boolean callSite = MethodUsageLocator.isCallSite(usage);
+    final AstNode definitionNode =
+        callSite ? AstQuery.getEnclosingCallableNode(usageNode) : usageNode;
+    if (definitionNode == null) {
+      return null;
+    }
+
+    final Range fromRange =
+        callSite ? new Range(usageNode) : this.getDefinitionNameRange(definitionNode);
+    if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+      return this.createIncomingCallForMethod(fromRange, uriStr, definitionNode);
+    } else if (definitionNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+      return this.createIncomingCallForProcedure(fromRange, uriStr, definitionNode);
+    }
+
+    throw new IllegalStateException("Unknown thing");
+  }
+
+  /** Get the range of the name of a definition, or of its first token when it has no name. */
+  private Range getDefinitionNameRange(final AstNode definitionNode) {
+    final AstNode nameNode =
+        definitionNode.getFirstChild(MagikGrammar.METHOD_NAME, MagikGrammar.PROCEDURE_NAME);
+    if (nameNode != null) {
+      return new Range(nameNode);
+    }
+
+    final Token firstToken = definitionNode.getToken();
+    return new Range(firstToken);
+  }
+
   private CallHierarchyIncomingCall createIncomingCallForMethod(
-      final AstNode calledNode, final String uriStr, final AstNode definitionNode) {
+      final Range fromRange, final String uriStr, final AstNode definitionNode) {
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
     final String fromMethodName = helper.getFullExemplarMethodName();
     final Range range = new Range(definitionNode);
@@ -171,13 +201,12 @@ public class CallHierarchyProvider {
             DATA_METHOD_NAME, helper.getMethodName(),
             DATA_URI, uriStr);
     fromItem.setData(data);
-    final Range fromRange = new Range(calledNode);
     return new CallHierarchyIncomingCall(
         fromItem, List.of(Lsp4jConversion.rangeToLsp4j(fromRange)));
   }
 
   private CallHierarchyIncomingCall createIncomingCallForProcedure(
-      final AstNode calledNode, final String uriStr, final AstNode definitionNode) {
+      final Range fromRange, final String uriStr, final AstNode definitionNode) {
     final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(definitionNode);
     final String fromProcName = helper.getProcedureName();
     final Range range = new Range(definitionNode);
@@ -194,7 +223,6 @@ public class CallHierarchyProvider {
             DATA_TYPE_STRING, typeStrStr,
             DATA_URI, uriStr);
     fromItem.setData(data);
-    final Range fromRange = new Range(calledNode);
     return new CallHierarchyIncomingCall(
         fromItem, List.of(Lsp4jConversion.rangeToLsp4j(fromRange)));
   }
@@ -229,56 +257,104 @@ public class CallHierarchyProvider {
     final MagikTypedFile magikFile = new MagikTypedFile(uri, text, this.definitionKeeper);
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-    final Stream<AstNode> definitionNodes;
+    final List<MagikDefinition> itemDefinitions = this.findItemDefinitions(magikFile, item);
+    final Stream<CallHierarchyOutgoingCall> callSiteCalls =
+        itemDefinitions.stream()
+            .map(MagikDefinition::getNode)
+            .flatMap(node -> node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream())
+            .flatMap(
+                methodInvocationNode -> {
+                  // Determine/reason the type the method is called on.
+                  final MethodInvocationNodeHelper helper =
+                      new MethodInvocationNodeHelper(methodInvocationNode);
+                  final AstNode receiverNode = helper.getReceiverNode();
+                  final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
+                  final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
+                  final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, receiverNode);
+                  if (typeStr.isUndefined()) {
+                    return Stream.empty();
+                  }
+
+                  // Build the outgoing call for the method definition.
+                  final String calledMethodName = helper.getMethodName();
+                  final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+                  final Range fromRange = new Range(methodInvocationNode);
+                  return resolver.getRespondingMethodDefinitions(typeStr, calledMethodName).stream()
+                      .map(calledMethodDef -> this.createOutgoingCall(fromRange, calledMethodDef));
+                });
+    final Stream<CallHierarchyOutgoingCall> declaredCalls =
+        itemDefinitions.stream()
+            .flatMap(definition -> this.createDeclaredOutgoingCalls(magikFile, definition));
+    return Stream.concat(callSiteCalls, declaredCalls).toList();
+  }
+
+  /** Find the definitions in the file which the item stands for. */
+  private List<MagikDefinition> findItemDefinitions(
+      final MagikTypedFile magikFile, final CallHierarchyItem item) {
+    final JsonElement element = (JsonElement) item.getData();
+    final JsonObject object = element.getAsJsonObject();
+    final List<MagikDefinition> definitions = magikFile.getMagikDefinitions();
     if (object.has(DATA_METHOD_NAME)) {
       // Method item.
       final String itemName = item.getName();
-      definitionNodes =
-          magikFile.getMagikDefinitions().stream()
-              .filter(MethodDefinition.class::isInstance)
-              .map(MethodDefinition.class::cast)
-              .filter(methodDef -> methodDef.getName().equals(itemName))
-              .map(MethodDefinition::getNode);
-    } else {
-      // Procedure item.
-      final String typeStringStr = object.getAsJsonPrimitive(DATA_TYPE_STRING).getAsString();
-      definitionNodes =
-          magikFile.getMagikDefinitions().stream()
-              .filter(ProcedureDefinition.class::isInstance)
-              .map(ProcedureDefinition.class::cast)
-              .filter(procDef -> procDef.getTypeString().getFullString().equals(typeStringStr))
-              .map(ProcedureDefinition::getNode);
+      return definitions.stream()
+          .filter(MethodDefinition.class::isInstance)
+          .map(MethodDefinition.class::cast)
+          .filter(methodDef -> methodDef.getName().equals(itemName))
+          .map(MagikDefinition.class::cast)
+          .toList();
     }
 
-    return definitionNodes
-        .flatMap(node -> node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream())
-        .flatMap(
-            methodInvocationNode -> {
-              // Determine/reason the type the method is called on.
-              final MethodInvocationNodeHelper helper =
-                  new MethodInvocationNodeHelper(methodInvocationNode);
-              final AstNode receiverNode = helper.getReceiverNode();
-              final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
-              final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
-              final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, receiverNode);
-              if (typeStr.isUndefined()) {
-                return Stream.empty();
-              }
-
-              // Construct the CallHierarchyItem/CallHierarchyOutgoingCall for method
-              // definition.
-              final String calledMethodName = helper.getMethodName();
-              final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-              return resolver.getRespondingMethodDefinitions(typeStr, calledMethodName).stream()
-                  .map(
-                      calledMethodDef ->
-                          this.createOutgoingCall(methodInvocationNode, calledMethodDef));
-            })
+    // Procedure item.
+    final String typeStringStr = object.getAsJsonPrimitive(DATA_TYPE_STRING).getAsString();
+    return definitions.stream()
+        .filter(ProcedureDefinition.class::isInstance)
+        .map(ProcedureDefinition.class::cast)
+        .filter(procDef -> procDef.getTypeString().getFullString().equals(typeStringStr))
+        .map(MagikDefinition.class::cast)
         .toList();
   }
 
+  /**
+   * Create the outgoing calls a definition declares with {@code @invokes_method} annotations. A
+   * declared usage sits at its definition, a call site at its invocation.
+   */
+  private Stream<CallHierarchyOutgoingCall> createDeclaredOutgoingCalls(
+      final MagikTypedFile magikFile, final MagikDefinition definition) {
+    final Location definitionLocation = definition.getLocation();
+    final AstNode definitionNode = definition.getNode();
+    final Range fromRange = this.getDefinitionNameRange(definitionNode);
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    final List<MethodUsage> usages = CallHierarchyProvider.getUsedMethods(definition);
+    return usages.stream()
+        .filter(
+            usage -> {
+              final Location usageLocation = usage.getLocation();
+              return Objects.equals(usageLocation, definitionLocation);
+            })
+        .flatMap(
+            usage -> {
+              final TypeString typeStr = usage.getTypeName();
+              final String calledMethodName = usage.getMethodName();
+              final Collection<MethodDefinition> calledMethodDefs =
+                  resolver.getRespondingMethodDefinitions(typeStr, calledMethodName);
+              return calledMethodDefs.stream();
+            })
+        .map(calledMethodDef -> this.createOutgoingCall(fromRange, calledMethodDef));
+  }
+
+  /** Get the method usages of a method or procedure definition. */
+  private static List<MethodUsage> getUsedMethods(final MagikDefinition definition) {
+    if (definition instanceof final MethodDefinition methodDefinition) {
+      return methodDefinition.getUsedMethods();
+    }
+
+    final ProcedureDefinition procedureDefinition = (ProcedureDefinition) definition;
+    return procedureDefinition.getUsedMethods();
+  }
+
   private CallHierarchyOutgoingCall createOutgoingCall(
-      final AstNode methodInvocationNode, final MethodDefinition calledMethodDef) {
+      final Range fromRange, final MethodDefinition calledMethodDef) {
     final Location calledMethodLocation = calledMethodDef.getLocation();
     final Location validCalledMethodLocation = Location.validLocation(calledMethodLocation);
     final Range calledMethodRange = validCalledMethodLocation.getRange();
@@ -298,7 +374,6 @@ public class CallHierarchyProvider {
             DATA_URI,
             validCalledMethodLocation.getUri().toString());
     toItem.setData(data);
-    final Range fromRange = new Range(methodInvocationNode);
     return new CallHierarchyOutgoingCall(toItem, List.of(Lsp4jConversion.rangeToLsp4j(fromRange)));
   }
 }

@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -27,6 +29,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -44,56 +47,287 @@ public class MethodUsageLocator {
     this.definitionKeeper = definitionKeeper;
   }
 
+  /** What {@link #getMethodUsages(MethodUsage, Set)} answers besides the calls in methods. */
+  public enum Option {
+    /**
+     * Usages a definition declares with an {@code @invokes_method} annotation. Such a usage is no
+     * call site: it carries no receiver node and no arguments.
+     */
+    DECLARED_USAGES,
+    /** Usages of procedure definitions. */
+    PROCEDURE_USAGES,
+    /** Usages of global definitions: the calls in the initialiser of a global. */
+    GLOBAL_USAGES,
+  }
+
+  /** A usage to test, with the location of the definition it was read from. */
+  private record Candidate(MethodUsage usage, Location definitionLocation) {
+
+    boolean isDeclared() {
+      return MethodUsageLocator.isDeclaredUsage(this.usage, this.definitionLocation);
+    }
+
+    boolean hasMethodName(final String methodName) {
+      final String usageMethodName = this.usage.getMethodName();
+      return Objects.equals(usageMethodName, methodName);
+    }
+  }
+
+  /**
+   * Test if a definition declares a usage with an {@code @invokes_method} annotation. A declared
+   * usage sits at its definition, a call site at its invocation.
+   *
+   * @param usage Usage, as its definition holds it.
+   * @param definitionLocation Location of the definition holding the usage.
+   * @return True if the usage is a declared one.
+   */
+  public static boolean isDeclaredUsage(
+      final MethodUsage usage, final Location definitionLocation) {
+    final Location usageLocation = usage.getLocation();
+    return usageLocation != null && usageLocation.equals(definitionLocation);
+  }
+
+  /** What tells one answered usage from another: a call site twice read is one usage. */
+  private record AnsweredKey(Location location, TypeString typeStr, boolean declared) {}
+
+  private Stream<Candidate> candidateUsages(final Set<Option> options) {
+    final Collection<MethodDefinition> methodDefs = this.definitionKeeper.getMethodDefinitions();
+    final Stream<Candidate> methodCandidates =
+        methodDefs.stream().flatMap(MethodUsageLocator::createMethodCandidates);
+    final Stream<Candidate> procedureCandidates = this.procedureCandidates(options);
+    final Stream<Candidate> globalCandidates = this.globalCandidates(options);
+    return Stream.of(methodCandidates, procedureCandidates, globalCandidates)
+        .flatMap(Function.identity());
+  }
+
+  private Stream<Candidate> procedureCandidates(final Set<Option> options) {
+    if (!options.contains(Option.PROCEDURE_USAGES)) {
+      return Stream.empty();
+    }
+
+    final Collection<ProcedureDefinition> procedureDefs =
+        this.definitionKeeper.getProcedureDefinitions();
+    return procedureDefs.stream().flatMap(MethodUsageLocator::createProcedureCandidates);
+  }
+
+  private Stream<Candidate> globalCandidates(final Set<Option> options) {
+    if (!options.contains(Option.GLOBAL_USAGES)) {
+      return Stream.empty();
+    }
+
+    final Collection<GlobalDefinition> globalDefs = this.definitionKeeper.getGlobalDefinitions();
+    return globalDefs.stream().flatMap(MethodUsageLocator::createGlobalCandidates);
+  }
+
+  private static Stream<Candidate> createMethodCandidates(final MethodDefinition methodDef) {
+    final Collection<MethodUsage> usages = methodDef.getUsedMethods();
+    final Location definitionLocation = methodDef.getLocation();
+    return MethodUsageLocator.createCandidates(usages, definitionLocation);
+  }
+
+  private static Stream<Candidate> createProcedureCandidates(
+      final ProcedureDefinition procedureDef) {
+    final Collection<MethodUsage> usages = procedureDef.getUsedMethods();
+    final Location definitionLocation = procedureDef.getLocation();
+    return MethodUsageLocator.createCandidates(usages, definitionLocation);
+  }
+
+  private static Stream<Candidate> createGlobalCandidates(final GlobalDefinition globalDef) {
+    final Collection<MethodUsage> usages = globalDef.getUsedMethods();
+    final Location definitionLocation = globalDef.getLocation();
+    return MethodUsageLocator.createCandidates(usages, definitionLocation);
+  }
+
+  private static Stream<Candidate> createCandidates(
+      final Collection<MethodUsage> usages, final Location definitionLocation) {
+    return usages.stream().map(usage -> new Candidate(usage, definitionLocation));
+  }
+
+  /**
+   * Get the method usages for the wanted method usage: the calls in method bodies whose receiver
+   * may reach the wanted method, each a usage of the wanted type on its {@code METHOD_INVOCATION}
+   * node.
+   *
+   * @param wantedMethodUsage The wanted {@link MethodUsage}.
+   * @return The {@link MethodUsage}s for the wanted method usage.
+   */
   public List<Map.Entry<MethodUsage, MagikTypedFile>> getMethodUsages(
       final MethodUsage wantedMethodUsage) {
+    final Set<Option> options = Set.of();
+    return this.getMethodUsages(wantedMethodUsage, options);
+  }
+
+  /**
+   * Get the method usages for the wanted method usage, as {@link #getMethodUsages(MethodUsage)},
+   * and those the options ask for.
+   *
+   * <p>A declared usage is answered on the node of its definition, a {@code METHOD_DEFINITION} or
+   * {@code PROCEDURE_DEFINITION}, and keeps the type its annotation names. With any option set, a
+   * usage two definitions hold is answered once.
+   *
+   * @param wantedMethodUsage The wanted {@link MethodUsage}.
+   * @param options What to answer besides the calls in methods.
+   * @return The {@link MethodUsage}s for the wanted method usage.
+   */
+  public List<Map.Entry<MethodUsage, MagikTypedFile>> getMethodUsages(
+      final MethodUsage wantedMethodUsage, final Set<Option> options) {
     final String methodName = wantedMethodUsage.getMethodName();
+    final boolean answerDeclared = options.contains(Option.DECLARED_USAGES);
 
-    return this.definitionKeeper.getMethodDefinitions().stream()
-        .flatMap(methodDef -> methodDef.getUsedMethods().stream())
-        .filter(usage -> usage.getMethodName().equals(methodName))
-        .map(
-            usage -> {
-              final Location location = usage.getLocation();
-              final MagikTypedFile magikFile = this.getMagikFile(location);
+    final Stream<Map.Entry<MethodUsage, MagikTypedFile>> answeredUsages =
+        this.candidateUsages(options)
+            .filter(candidate -> candidate.hasMethodName(methodName))
+            .filter(candidate -> answerDeclared || !candidate.isDeclared())
+            .map(candidate -> this.locateUsage(candidate, wantedMethodUsage))
+            .filter(Objects::nonNull);
+    if (options.isEmpty()) {
+      return answeredUsages.toList();
+    }
 
-              // Determine/reason the type the method is called on.
-              final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-              final AstNode invocationNode =
-                  MethodUsageLocator.findInvocationNode(magikFile, location);
-              if (invocationNode == null) {
-                return null;
-              }
-
-              final MethodInvocationNodeHelper helper =
-                  new MethodInvocationNodeHelper(invocationNode);
-              final AstNode receiverNode = helper.getReceiverNode();
-              final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
-              final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
-              final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, invocationNode);
-              if (typeStr.isUndefined()) {
-                return null;
-              }
-
-              final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-              final TypeString wantedMethodUsageTypeStr = wantedMethodUsage.getTypeName();
-              final boolean isSuperReceiver =
-                  receiverNode.getFirstChild(MagikGrammar.SUPER) != null;
-              final boolean reachesWanted =
-                  isSuperReceiver
-                      ? MethodUsageLocator.isSuperDispatchTo(
-                          resolver, typeStr, wantedMethodUsageTypeStr, methodName)
-                      : MethodUsageLocator.isReachedFrom(
-                          resolver, typeStr, wantedMethodUsageTypeStr, methodName);
-              if (!reachesWanted) {
-                return null;
-              }
-
-              final MethodUsage methodUsageWithNode =
-                  new MethodUsage(wantedMethodUsageTypeStr, methodName, location, invocationNode);
-              return Map.entry(methodUsageWithNode, magikFile);
+    // A call in a procedure nested in a method is a usage of both definitions.
+    final Set<AnsweredKey> answeredKeys = new HashSet<>();
+    return answeredUsages
+        .filter(
+            entry -> {
+              final MethodUsage usage = entry.getKey();
+              final AnsweredKey answeredKey = MethodUsageLocator.createAnsweredKey(usage);
+              return answeredKeys.add(answeredKey);
             })
-        .filter(Objects::nonNull)
         .toList();
+  }
+
+  private static AnsweredKey createAnsweredKey(final MethodUsage usage) {
+    final Location location = usage.getLocation();
+    final TypeString typeStr = usage.getTypeName();
+    final boolean declared = !MethodUsageLocator.isCallSite(usage);
+    return new AnsweredKey(location, typeStr, declared);
+  }
+
+  /**
+   * Test if an answered usage is a call site, on its {@code METHOD_INVOCATION} node, and not a
+   * declared usage, on the node of its definition.
+   *
+   * @param usage Usage answered by {@link #getMethodUsages(MethodUsage, Set)}.
+   * @return True if the usage is a call site.
+   */
+  public static boolean isCallSite(final MethodUsage usage) {
+    final AstNode node = usage.getNode();
+    return node != null && node.is(MagikGrammar.METHOD_INVOCATION);
+  }
+
+  @CheckForNull
+  private Map.Entry<MethodUsage, MagikTypedFile> locateUsage(
+      final Candidate candidate, final MethodUsage wantedMethodUsage) {
+    final MethodUsage usage = candidate.usage();
+    return candidate.isDeclared()
+        ? this.locateDeclaredUsage(usage, wantedMethodUsage)
+        : this.locateCallSite(usage, wantedMethodUsage);
+  }
+
+  /**
+   * Locate a call site: reason its receiver, and test if a call on it may reach the wanted method.
+   *
+   * @return The usage on its invocation node, or {@code null} when it does not reach the wanted
+   *     method.
+   */
+  @CheckForNull
+  private Map.Entry<MethodUsage, MagikTypedFile> locateCallSite(
+      final MethodUsage usage, final MethodUsage wantedMethodUsage) {
+    final String methodName = wantedMethodUsage.getMethodName();
+    final Location location = usage.getLocation();
+    final MagikTypedFile magikFile = this.getMagikFile(location);
+
+    final AstNode invocationNode = MethodUsageLocator.findInvocationNode(magikFile, location);
+    if (invocationNode == null) {
+      return null;
+    }
+
+    // Determine/reason the type the method is called on.
+    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
+    final AstNode receiverNode = helper.getReceiverNode();
+    final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
+    final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
+    final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, invocationNode);
+    if (typeStr.isUndefined()) {
+      return null;
+    }
+
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    final TypeString wantedMethodUsageTypeStr = wantedMethodUsage.getTypeName();
+    final boolean isSuperReceiver = receiverNode.getFirstChild(MagikGrammar.SUPER) != null;
+    final boolean reachesWanted =
+        isSuperReceiver
+            ? MethodUsageLocator.isSuperDispatchTo(
+                resolver, typeStr, wantedMethodUsageTypeStr, methodName)
+            : MethodUsageLocator.isReachedFrom(
+                resolver, typeStr, wantedMethodUsageTypeStr, methodName);
+    if (!reachesWanted) {
+      return null;
+    }
+
+    final MethodUsage methodUsageWithNode =
+        new MethodUsage(wantedMethodUsageTypeStr, methodName, location, invocationNode);
+    return Map.entry(methodUsageWithNode, magikFile);
+  }
+
+  /**
+   * Locate a declared usage: test if a call on the type its annotation names may reach the wanted
+   * method. An annotation names a type, never {@code _self} or {@code _super}.
+   *
+   * @return The usage on the node of its definition, or {@code null} when it does not reach the
+   *     wanted method.
+   */
+  @CheckForNull
+  private Map.Entry<MethodUsage, MagikTypedFile> locateDeclaredUsage(
+      final MethodUsage usage, final MethodUsage wantedMethodUsage) {
+    final TypeString declaredTypeStr = usage.getTypeName();
+    if (declaredTypeStr.isUndefined()) {
+      return null;
+    }
+
+    final Location location = usage.getLocation();
+    final MagikTypedFile magikFile = this.getMagikFile(location);
+    final AstNode definitionNode = MethodUsageLocator.findDefinitionNode(magikFile, location);
+    if (definitionNode == null) {
+      return null;
+    }
+
+    final String methodName = wantedMethodUsage.getMethodName();
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    final TypeString wantedTypeStr = wantedMethodUsage.getTypeName();
+    final boolean reachesWanted =
+        MethodUsageLocator.isReachedFrom(resolver, declaredTypeStr, wantedTypeStr, methodName);
+    if (!reachesWanted) {
+      return null;
+    }
+
+    final MethodUsage methodUsageWithNode =
+        new MethodUsage(declaredTypeStr, methodName, location, definitionNode);
+    return Map.entry(methodUsageWithNode, magikFile);
+  }
+
+  /**
+   * Find the definition a declared usage sits at: the innermost method or procedure definition at
+   * the start of the usage.
+   *
+   * @param magikFile File of the usage.
+   * @param location Location of the usage, which is the location of its definition.
+   * @return The definition node, or {@code null} when the file no longer has one there.
+   */
+  @CheckForNull
+  private static AstNode findDefinitionNode(
+      final MagikTypedFile magikFile, final Location location) {
+    final AstNode topNode = magikFile.getTopNode();
+    final Range range = location.getRange();
+    final Position definitionPosition = range.getStartPosition();
+    final AstNode definitionTokenNode = AstQuery.nodeAt(topNode, definitionPosition);
+    if (definitionTokenNode == null) {
+      return null;
+    }
+
+    return definitionTokenNode.getFirstAncestor(
+        MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
   }
 
   /**

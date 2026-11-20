@@ -2,6 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.AstNodeType;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
@@ -18,6 +20,7 @@ import nl.ramsolutions.sw.magik.analysis.SmallworldProjectExtension;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -157,6 +160,234 @@ class MethodUsageLocatorTest {
         this.locateMethodUsages("a", "method_name");
 
     assertThat(usages).hasSize(1);
+  }
+
+  @Test
+  void testInvokesMethodAnnotationIsDeclaredUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method a.caller(name)
+          ## @invokes_method {user:a.method_name}
+          _self.perform(name)
+        _endmethod
+
+        _method a.real_caller
+          _self.method_name
+        _endmethod
+        """;
+    this.addMagikFile(code);
+    final Set<MethodUsageLocator.Option> options =
+        Set.of(MethodUsageLocator.Option.DECLARED_USAGES);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        this.locateMethodUsages("a", "method_name", options);
+
+    assertThat(usages).hasSize(2);
+    final MethodUsage declaredUsage = this.getUsageAtLine(usages, 6);
+    final boolean declaredIsCallSite = MethodUsageLocator.isCallSite(declaredUsage);
+    assertThat(declaredIsCallSite).isFalse();
+    final AstNode declaredNode = declaredUsage.getNode();
+    final AstNodeType declaredNodeType = declaredNode.getType();
+    assertThat(declaredNodeType).isEqualTo(MagikGrammar.METHOD_DEFINITION);
+    final MethodUsage callUsage = this.getUsageAtLine(usages, 12);
+    final boolean callIsCallSite = MethodUsageLocator.isCallSite(callUsage);
+    assertThat(callIsCallSite).isTrue();
+  }
+
+  @Test
+  void testInvokesMethodAnnotationOnOtherReceiverIsNotDeclaredUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        def_slotted_exemplar(:b, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method b.caller(name)
+          ## @invokes_method {user:b.method_name}
+          _self.perform(name)
+        _endmethod
+        """;
+    this.addMagikFile(code);
+    final Set<MethodUsageLocator.Option> options =
+        Set.of(MethodUsageLocator.Option.DECLARED_USAGES);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        this.locateMethodUsages("a", "method_name", options);
+
+    assertThat(usages).isEmpty();
+  }
+
+  @Test
+  void testInvokesMethodAnnotationOnSubtypeIsDeclaredUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        def_slotted_exemplar(:b, {}, {:a})
+
+        _method a.method_name
+        _endmethod
+
+        _method b.caller(name)
+          ## @invokes_method {user:b.method_name}
+          _self.perform(name)
+        _endmethod
+        """;
+    this.addMagikFile(code);
+    final Set<MethodUsageLocator.Option> options =
+        Set.of(MethodUsageLocator.Option.DECLARED_USAGES);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        this.locateMethodUsages("a", "method_name", options);
+
+    assertThat(usages).hasSize(1);
+  }
+
+  @Test
+  void testProcedureUsagesAreAnsweredOnRequestOnly() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _global p << _proc@p()
+          a.method_name
+        _endproc
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> defaultUsages =
+        this.locateMethodUsages("a", "method_name");
+    final Set<MethodUsageLocator.Option> options =
+        Set.of(MethodUsageLocator.Option.PROCEDURE_USAGES);
+    final List<Entry<MethodUsage, MagikTypedFile>> procedureUsages =
+        this.locateMethodUsages("a", "method_name", options);
+
+    assertThat(defaultUsages).isEmpty();
+    assertThat(procedureUsages).hasSize(1);
+  }
+
+  @Test
+  void testGlobalUsagesAreAnsweredOnRequestOnly() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _global g << a.method_name
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> defaultUsages =
+        this.locateMethodUsages("a", "method_name");
+    final Set<MethodUsageLocator.Option> options = Set.of(MethodUsageLocator.Option.GLOBAL_USAGES);
+    final List<Entry<MethodUsage, MagikTypedFile>> globalUsages =
+        this.locateMethodUsages("a", "method_name", options);
+
+    assertThat(defaultUsages).isEmpty();
+    assertThat(globalUsages).hasSize(1);
+  }
+
+  @Test
+  void testCallInProcedureInMethodIsAnsweredOnce() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method a.runner
+          _return _proc@p()
+            a.method_name
+          _endproc
+        _endmethod
+        """;
+    this.addMagikFile(code);
+    final Set<MethodUsageLocator.Option> options =
+        Set.of(MethodUsageLocator.Option.PROCEDURE_USAGES);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        this.locateMethodUsages("a", "method_name", options);
+
+    assertThat(usages).hasSize(1);
+  }
+
+  @Test
+  void testAnnotatedProcedureArgumentIsNotEnclosingCall() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method a.do(callback)
+        _endmethod
+
+        _method a.runner
+          _self.do(_proc@p(name)
+            ## @invokes_method {user:a.method_name}
+          _endproc)
+        _endmethod
+        """;
+    this.addMagikFile(code);
+    final Set<MethodUsageLocator.Option> procedureOptions =
+        Set.of(MethodUsageLocator.Option.PROCEDURE_USAGES);
+    final Set<MethodUsageLocator.Option> allOptions =
+        Set.of(
+            MethodUsageLocator.Option.PROCEDURE_USAGES, MethodUsageLocator.Option.DECLARED_USAGES);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> procedureUsages =
+        this.locateMethodUsages("a", "method_name", procedureOptions);
+    final List<Entry<MethodUsage, MagikTypedFile>> allUsages =
+        this.locateMethodUsages("a", "method_name", allOptions);
+
+    // The annotated procedure sits inside the invocation of `do()`, which is no call of the method.
+    assertThat(procedureUsages).isEmpty();
+    assertThat(allUsages).hasSize(1);
+    final Entry<MethodUsage, MagikTypedFile> entry = allUsages.get(0);
+    final MethodUsage usage = entry.getKey();
+    final AstNode node = usage.getNode();
+    final AstNodeType nodeType = node.getType();
+    assertThat(nodeType).isEqualTo(MagikGrammar.PROCEDURE_DEFINITION);
+  }
+
+  private MethodUsage getUsageAtLine(
+      final List<Entry<MethodUsage, MagikTypedFile>> usages, final int line) {
+    return usages.stream()
+        .map(Entry::getKey)
+        .filter(usage -> this.getStartLine(usage) == line)
+        .findFirst()
+        .orElseThrow();
+  }
+
+  private int getStartLine(final MethodUsage usage) {
+    final Location location = usage.getLocation();
+    final Range range = location.getRange();
+    final Position startPosition = range.getStartPosition();
+    return startPosition.getLine();
+  }
+
+  private List<Entry<MethodUsage, MagikTypedFile>> locateMethodUsages(
+      final String exemplarName,
+      final String methodName,
+      final Set<MethodUsageLocator.Option> options) {
+    final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
+    final MethodUsageLocator methodUsageLocator = new MethodUsageLocator(definitionKeeper);
+    final TypeString typeStr = TypeString.ofIdentifier(exemplarName, "user");
+    final MethodUsage wantedMethodUsage = new MethodUsage(typeStr, methodName);
+    return methodUsageLocator.getMethodUsages(wantedMethodUsage, options);
   }
 
   @Test

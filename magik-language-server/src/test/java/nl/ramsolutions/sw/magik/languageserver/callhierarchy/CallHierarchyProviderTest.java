@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver.callhierarchy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.URI;
@@ -16,6 +17,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.eclipse.lsp4j.CallHierarchyIncomingCall;
 import org.eclipse.lsp4j.CallHierarchyItem;
 import org.eclipse.lsp4j.CallHierarchyOutgoingCall;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SymbolKind;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -145,7 +147,7 @@ class CallHierarchyProviderTest {
   }
 
   @Test
-  void testCallHierarchyIncomingCallsSkipsInvokesMethodAnnotation() throws IOException {
+  void testCallHierarchyIncomingCallsAnswersInvokesMethodAnnotation() throws IOException {
     final String code =
         """
         def_slotted_exemplar(:a, {})
@@ -159,6 +161,136 @@ class CallHierarchyProviderTest {
           _self.method_name
         _endmethod
         """;
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactlyInAnyOrder("user:a.caller()", "user:a.real_caller");
+    final CallHierarchyIncomingCall annotatedCall = this.getCallFrom(calls, "user:a.caller()");
+    final List<Range> fromRanges = annotatedCall.getFromRanges();
+    // The name `caller` of the annotated definition.
+    final org.eclipse.lsp4j.Position nameStart = new org.eclipse.lsp4j.Position(3, 10);
+    final org.eclipse.lsp4j.Position nameEnd = new org.eclipse.lsp4j.Position(3, 16);
+    final Range nameRange = new Range(nameStart, nameEnd);
+    assertThat(fromRanges).containsExactly(nameRange);
+    final CallHierarchyItem from = annotatedCall.getFrom();
+    final SymbolKind fromKind = from.getKind();
+    assertThat(fromKind).isEqualTo(SymbolKind.Method);
+  }
+
+  @Test
+  void testCallHierarchyIncomingCallsSkipsInvokesMethodAnnotationOnOtherReceiver()
+      throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        def_slotted_exemplar(:b, {})
+        _method a.method_name
+        _endmethod
+        _method b.caller(name)
+          ## @invokes_method {user:b.method_name}
+          _self.perform(name)
+        _endmethod
+        _method a.real_caller
+          _self.method_name
+        _endmethod
+        """;
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactly("user:a.real_caller");
+  }
+
+  @Test
+  void testCallHierarchyIncomingCallsAnswersInvokesMethodAnnotationOnProcedure()
+      throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _global p << _proc@p(name)
+          ## @invokes_method {user:a.method_name}
+          a.perform(name)
+        _endproc
+        """;
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactly("p");
+    final CallHierarchyIncomingCall call = calls.get(0);
+    final CallHierarchyItem from = call.getFrom();
+    final SymbolKind fromKind = from.getKind();
+    assertThat(fromKind).isEqualTo(SymbolKind.Function);
+  }
+
+  @Test
+  void testCallHierarchyIncomingCallsCallerIsTopLevelProcedure() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _global p << _proc@p()
+          a.method_name
+        _endproc
+        q << _proc@q()
+          a.method_name
+        _endproc
+        """;
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactlyInAnyOrder("p", "q");
+  }
+
+  @Test
+  void testCallHierarchyIncomingCallsCallerIsProcedureInMethodOnce() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _method a.runner
+          _return _proc@p()
+            a.method_name
+          _endproc
+        _endmethod
+        """;
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactly("p");
+  }
+
+  @Test
+  void testCallHierarchyIncomingCallsAnnotatedProcedureArgumentIsNotEnclosingCall()
+      throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _method a.do(callback)
+        _endmethod
+        _method a.runner
+          _self.do(_proc@p(name)
+            ## @invokes_method {user:a.method_name}
+          _endproc)
+        _endmethod
+        """;
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactly("p");
+  }
+
+  private List<CallHierarchyIncomingCall> findIncomingCalls(final String code) throws IOException {
     final Path path = this.smallworldProject.pathOf("/source.magik");
     this.smallworldProject.addMagikFile(path, code);
     final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
@@ -173,13 +305,25 @@ class CallHierarchyProviderTest {
     final CallHierarchyItem item = new CallHierarchyItem();
     item.setData(data);
 
-    final List<CallHierarchyIncomingCall> calls = provider.callHierarchyIncomingCalls(item);
+    return provider.callHierarchyIncomingCalls(item);
+  }
 
-    assertThat(calls).hasSize(1);
-    final CallHierarchyIncomingCall call = calls.get(0);
+  private List<String> getFromNames(final List<CallHierarchyIncomingCall> calls) {
+    return calls.stream()
+        .map(CallHierarchyIncomingCall::getFrom)
+        .map(CallHierarchyItem::getName)
+        .toList();
+  }
+
+  private CallHierarchyIncomingCall getCallFrom(
+      final List<CallHierarchyIncomingCall> calls, final String fromName) {
+    return calls.stream().filter(call -> this.isCallFrom(call, fromName)).findFirst().orElseThrow();
+  }
+
+  private boolean isCallFrom(final CallHierarchyIncomingCall call, final String fromName) {
     final CallHierarchyItem from = call.getFrom();
-    final String fromName = from.getName();
-    assertThat(fromName).contains("real_caller");
+    final String name = from.getName();
+    return name.equals(fromName);
   }
 
   // ---- callHierarchyOutgoingCalls ----
@@ -221,6 +365,43 @@ class CallHierarchyProviderTest {
 
     assertThat(calls).isNotEmpty();
     assertThat(calls.get(0).getTo().getName()).contains("target_method");
+  }
+
+  @Test
+  void testCallHierarchyOutgoingCallsAnswersInvokesMethodAnnotation() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _method a.caller(name)
+          ## @invokes_method {user:a.method_name}
+        _endmethod
+        """;
+    final Path path = this.smallworldProject.pathOf("/source.magik");
+    final MagikTypedFile magikFile = this.smallworldProject.addMagikFile(path, code);
+    final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
+    final CallHierarchyProvider provider = new CallHierarchyProvider(definitionKeeper);
+    final Position position = new Position(4, 12); // On `caller`.
+    final List<CallHierarchyItem> items = provider.prepareCallHierarchy(magikFile, position);
+    final CallHierarchyItem item = items.get(0);
+    final Object itemData = item.getData();
+    final JsonElement jsonData = GSON.toJsonTree(itemData);
+    item.setData(jsonData);
+
+    final List<CallHierarchyOutgoingCall> calls = provider.callHierarchyOutgoingCalls(item);
+
+    assertThat(calls).hasSize(1);
+    final CallHierarchyOutgoingCall call = calls.get(0);
+    final CallHierarchyItem to = call.getTo();
+    final String toName = to.getName();
+    assertThat(toName).isEqualTo("user:a.method_name");
+    final List<Range> fromRanges = call.getFromRanges();
+    // The name `caller` of the annotated definition.
+    final org.eclipse.lsp4j.Position nameStart = new org.eclipse.lsp4j.Position(3, 10);
+    final org.eclipse.lsp4j.Position nameEnd = new org.eclipse.lsp4j.Position(3, 16);
+    final Range nameRange = new Range(nameStart, nameEnd);
+    assertThat(fromRanges).containsExactly(nameRange);
   }
 
   @Test

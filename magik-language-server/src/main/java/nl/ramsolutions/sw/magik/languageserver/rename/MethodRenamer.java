@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
@@ -28,6 +29,12 @@ import org.eclipse.lsp4j.PrepareRenameResult;
 
 /** Magik method renamer. */
 class MethodRenamer extends Renamer {
+
+  private static final Set<MethodUsageLocator.Option> USAGE_OPTIONS =
+      Set.of(
+          MethodUsageLocator.Option.DECLARED_USAGES,
+          MethodUsageLocator.Option.PROCEDURE_USAGES,
+          MethodUsageLocator.Option.GLOBAL_USAGES);
 
   MethodRenamer(final MagikTypedFile magikFile, final AstNode node) {
     super(magikFile, node);
@@ -86,29 +93,9 @@ class MethodRenamer extends Renamer {
     final MethodUsageLocator methodUsageLocator = new MethodUsageLocator(definitionKeeper);
     final MethodUsage searchedMethodUsage = new MethodUsage(typeString, methodName);
     final Map<URI, List<TextEdit>> usageRenames =
-        methodUsageLocator.getMethodUsages(searchedMethodUsage).stream()
-            .map(
-                entry -> {
-                  final MethodUsage usage = entry.getKey();
-
-                  final Location location = usage.getLocation();
-                  Objects.requireNonNull(location);
-                  final Range range = location.getRange();
-                  Objects.requireNonNull(range);
-
-                  // The MethodUsage stores the METHOD_INVOCATION node (on the '.') of the call,
-                  // instead of the name itself. So get the next node.
-                  final AstNode methodInvocationNode = usage.getNode();
-                  Objects.requireNonNull(methodInvocationNode);
-                  final AstNode methodNameNode =
-                      methodInvocationNode.getFirstChild(MagikGrammar.METHOD_NAME);
-                  final Range methodNameRange = new Range(methodNameNode);
-
-                  final URI uri = location.getUri();
-                  final TextEdit edit = new TextEdit(methodNameRange, newName);
-                  final List<TextEdit> edits = List.of(edit);
-                  return Map.entry(uri, edits);
-                })
+        methodUsageLocator.getMethodUsages(searchedMethodUsage, USAGE_OPTIONS).stream()
+            .map(Map.Entry::getKey)
+            .map(usage -> this.createUsageEdits(usage, newName))
             .collect(
                 Collectors.toMap(
                     Map.Entry::getKey,
@@ -121,6 +108,34 @@ class MethodRenamer extends Renamer {
                 Map.Entry::getKey,
                 Map.Entry::getValue,
                 (a, b) -> Stream.concat(a.stream(), b.stream()).toList()));
+  }
+
+  /**
+   * Create the edits for a usage: the name at a call site, or the name in each {@code
+   * @invokes_method} annotation which declares the usage.
+   */
+  private Map.Entry<URI, List<TextEdit>> createUsageEdits(
+      final MethodUsage usage, final String newName) {
+    final Location location = usage.getLocation();
+    Objects.requireNonNull(location);
+    final AstNode usageNode = usage.getNode();
+    Objects.requireNonNull(usageNode);
+
+    final URI uri = location.getUri();
+    final List<Range> methodNameRanges;
+    if (MethodUsageLocator.isCallSite(usage)) {
+      // The MethodUsage stores the METHOD_INVOCATION node (on the '.') of the call,
+      // instead of the name itself. So get the next node.
+      final AstNode methodNameNode = usageNode.getFirstChild(MagikGrammar.METHOD_NAME);
+      final Range methodNameRange = new Range(methodNameNode);
+      methodNameRanges = List.of(methodNameRange);
+    } else {
+      methodNameRanges = InvokesMethodAnnotationLocator.findMethodNameRanges(usageNode, usage);
+    }
+
+    final List<TextEdit> edits =
+        methodNameRanges.stream().map(range -> new TextEdit(range, newName)).toList();
+    return Map.entry(uri, edits);
   }
 
   private TypeString getTypeStringForReceiverNode() {

@@ -6,6 +6,8 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -103,7 +105,7 @@ class MethodRenamerTest {
   }
 
   @Test
-  void testRenameMethodLeavesInvokesMethodAnnotation() throws IOException {
+  void testRenameMethodRewritesInvokesMethodAnnotation() throws IOException {
     final String code =
         """
         def_slotted_exemplar(:a, {})
@@ -120,8 +122,313 @@ class MethodRenamerTest {
           _self.method_name()
         _endmethod
         """;
-    final Position position = new Position(3, 10); // On `method_name`.
 
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _method a.caller(name)
+          ## @invokes_method {user:a.new_method_name()}
+          _self.perform(name)
+        _endmethod
+
+        _method a.real_caller()
+          _self.new_method_name()
+        _endmethod
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodRewritesInvokesMethodAnnotationForms() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method a.caller(name)
+          ## Calls by name.
+          ## @invokes_method {a.method_name}
+          ## @invokes_method {user:a.method_name}
+          ## @invokes_method {a.method_name}
+          ## @invokes_method {a.method_name()}
+          ## @invokes_method {a[]}
+          ## @invokes_method {a[method_name]}
+          ## @return {a.method_name} Not an invocation.
+          _self.perform(name)
+        _endmethod
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name
+        _endmethod
+
+        _method a.caller(name)
+          ## Calls by name.
+          ## @invokes_method {a.new_method_name}
+          ## @invokes_method {user:a.new_method_name}
+          ## @invokes_method {a.new_method_name}
+          ## @invokes_method {a.method_name()}
+          ## @invokes_method {a[]}
+          ## @invokes_method {a[method_name]}
+          ## @return {a.method_name} Not an invocation.
+          _self.perform(name)
+        _endmethod
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodRewritesTabIndentedInvokesMethodAnnotation() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _method a.caller(name)
+        \t\t## @invokes_method {a.method_name()}
+        \t\t_self.perform(name)
+        _endmethod
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _method a.caller(name)
+        \t\t## @invokes_method {a.new_method_name()}
+        \t\t_self.perform(name)
+        _endmethod
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodLeavesInvokesMethodAnnotationOnOtherReceiver() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        def_slotted_exemplar(:b, {})
+
+        _method b.caller(name)
+          ## @invokes_method {user:b.method_name()}
+          _self.perform(name)
+        _endmethod
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        def_slotted_exemplar(:b, {})
+
+        _method b.caller(name)
+          ## @invokes_method {user:b.method_name()}
+          _self.perform(name)
+        _endmethod
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodRewritesInvokesMethodAnnotationOnProcedure() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _global p << _proc@p(name)
+          ## @invokes_method {user:a.method_name()}
+          a.perform(name)
+        _endproc
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _global p << _proc@p(name)
+          ## @invokes_method {user:a.new_method_name()}
+          a.perform(name)
+        _endproc
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodRewritesCallInTopLevelProcedure() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _global p << _proc@p()
+          a.method_name()
+        _endproc
+        q << _proc@q()
+          a.method_name()
+        _endproc
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _global p << _proc@p()
+          a.new_method_name()
+        _endproc
+        q << _proc@q()
+          a.new_method_name()
+        _endproc
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodRewritesCallInGlobalInitialiser() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _global g << a.method_name()
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _global g << a.new_method_name()
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodRewritesCallInProcedureInMethodOnce() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _method a.runner()
+          _return _proc@p()
+            a.method_name()
+          _endproc
+        _endmethod
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _method a.runner()
+          _return _proc@p()
+            a.new_method_name()
+          _endproc
+        _endmethod
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  @Test
+  void testRenameMethodLeavesCallEnclosingAnnotatedProcedureArgument() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _method a.do(callback)
+        _endmethod
+
+        _method a.runner()
+          _self.do(_proc@p(name)
+            ## @invokes_method {user:a.method_name()}
+          _endproc)
+        _endmethod
+        """;
+
+    final String renamed = this.renameMethodName(code);
+
+    final String expected =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.new_method_name()
+        _endmethod
+
+        _method a.do(callback)
+        _endmethod
+
+        _method a.runner()
+          _self.do(_proc@p(name)
+            ## @invokes_method {user:a.new_method_name()}
+          _endproc)
+        _endmethod
+        """;
+    assertThat(renamed).isEqualTo(expected);
+  }
+
+  /** Rename the method at line 3 to {@code new_method_name} and apply the edits to the code. */
+  private String renameMethodName(final String code) throws IOException {
+    final Position position = new Position(3, 10); // On `method_name`.
     final Path path = this.extension.pathOf("/source.magik");
     final MagikTypedFile magikFile = this.extension.addMagikFile(path, code);
     final AstNode topNode = magikFile.getTopNode();
@@ -131,12 +438,42 @@ class MethodRenamerTest {
     final Map<URI, List<TextEdit>> renames = renamer.provideRename("new_method_name");
 
     final URI uri = URI.create("memory:test:///source.magik");
-    final Range definitionRange = new Range(new Position(3, 10), new Position(3, 21));
-    final Range callRange = new Range(new Position(12, 8), new Position(12, 19));
-    final TextEdit definitionEdit = new TextEdit(definitionRange, "new_method_name");
-    final TextEdit callEdit = new TextEdit(callRange, "new_method_name");
-    final List<TextEdit> expectedEdits = List.of(definitionEdit, callEdit);
-    assertThat(renames).isEqualTo(Map.of(uri, expectedEdits));
+    assertThat(renames).containsOnlyKeys(uri);
+    final List<TextEdit> edits = renames.get(uri);
+    return this.applyEdits(code, edits);
+  }
+
+  /** Apply single-line edits to the code, last edit first. Fails on overlapping edits. */
+  private String applyEdits(final String code, final List<TextEdit> edits) {
+    final Comparator<TextEdit> byStart = Comparator.comparing(this::getStartPosition);
+    final List<TextEdit> sortedEdits = edits.stream().sorted(byStart).toList();
+    final List<String> lines = new ArrayList<>(code.lines().toList());
+    Position nextStart = null;
+    for (int i = sortedEdits.size() - 1; i >= 0; --i) {
+      final TextEdit edit = sortedEdits.get(i);
+      final Range range = edit.getRange();
+      final Position start = range.getStartPosition();
+      final Position end = range.getEndPosition();
+      if (nextStart != null) {
+        assertThat(end).isLessThanOrEqualTo(nextStart);
+      }
+      nextStart = start;
+
+      final int lineIndex = start.getLine() - 1;
+      final String line = lines.get(lineIndex);
+      final String head = line.substring(0, start.getColumn());
+      final String tail = line.substring(end.getColumn());
+      final String newLine = head + edit.getNewText() + tail;
+      lines.set(lineIndex, newLine);
+    }
+
+    final String text = String.join("\n", lines);
+    return text + "\n";
+  }
+
+  private Position getStartPosition(final TextEdit edit) {
+    final Range range = edit.getRange();
+    return range.getStartPosition();
   }
 
   @Test

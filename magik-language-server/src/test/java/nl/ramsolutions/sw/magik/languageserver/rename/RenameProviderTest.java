@@ -182,4 +182,27 @@ class RenameProviderTest {
     final WorkspaceEdit workspaceEdit = this.provideRename(code, position, "new_name");
     assertThat(workspaceEdit).isNull();
   }
+
+  @Test
+  void testProvideRenameOnInvokesMethodAnnotationReturnsNull() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _method a.caller(name)
+          ## @invokes_method {user:a.method_name()}
+          _self.perform(name)
+        _endmethod
+        """;
+    final Position position = new Position(6, 32); // On `method_name` in the annotation.
+
+    final PrepareRenameResult prepareRename = this.providePrepareRename(code, position);
+    final WorkspaceEdit workspaceEdit = this.provideRename(code, position, "new_name");
+
+    assertThat(prepareRename).isNull();
+    assertThat(workspaceEdit).isNull();
+  }
 }
