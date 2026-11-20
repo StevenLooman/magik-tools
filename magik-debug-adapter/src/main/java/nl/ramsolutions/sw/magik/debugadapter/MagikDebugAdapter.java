@@ -13,8 +13,8 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
-import nl.ramsolutions.sw.magik.debugadapter.VariableManager.MagikVariable;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapEvent;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapException;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.SlapEventListener;
@@ -23,6 +23,8 @@ import nl.ramsolutions.sw.magik.debugadapter.slap.events.DisconnectedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.StepCompletedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadEndedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadStartedEvent;
+import nl.ramsolutions.sw.magik.debugadapter.variables.VariableManager;
+import nl.ramsolutions.sw.magik.debugadapter.variables.VariableManager.MagikVariable;
 import org.eclipse.lsp4j.debug.Breakpoint;
 import org.eclipse.lsp4j.debug.Capabilities;
 import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
@@ -62,9 +64,13 @@ import org.eclipse.lsp4j.debug.Thread;
 import org.eclipse.lsp4j.debug.ThreadsResponse;
 import org.eclipse.lsp4j.debug.Variable;
 import org.eclipse.lsp4j.debug.VariablesArguments;
+import org.eclipse.lsp4j.debug.VariablesArgumentsFilter;
 import org.eclipse.lsp4j.debug.VariablesResponse;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer;
+import org.eclipse.lsp4j.jsonrpc.ResponseErrorException;
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseError;
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,12 +85,16 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
   private static final String PATH_MAPPING_FROM_ARG = "from";
   private static final String PATH_MAPPING_TO_ARG = "to";
 
+  private static final String EVALUATE_WITHOUT_FRAME_MESSAGE =
+      "Select a stack frame of a stopped thread to evaluate an expression.";
+
   private IDebugProtocolClient debugClient;
-  private SlapProtocol slapProtocol;
-  private ThreadManager threadManager;
-  private VariableManager variableManager;
-  private BreakpointManager breakpointManager;
-  private PathMapper pathMapper;
+  // Set by attach() and disconnect() on one thread, used by request and event handler threads.
+  private volatile SlapProtocol slapProtocol;
+  private volatile ThreadManager threadManager;
+  private volatile VariableManager variableManager;
+  private volatile BreakpointManager breakpointManager;
+  private volatile PathMapper pathMapper;
 
   /**
    * Connect to the debug client.
@@ -113,7 +123,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
   public CompletableFuture<Void> configurationDone(final ConfigurationDoneArguments args) {
     LOGGER.trace("configurationDone");
 
-    return new CompletableFuture<>();
+    return CompletableFuture.completedFuture(null);
   }
 
   @Override
@@ -144,20 +154,33 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
         () -> {
           try {
             // Connect to session.
-            this.slapProtocol = new SlapProtocol(host, port, this);
-            this.slapProtocol.connect();
+            final SlapProtocol newSlapProtocol = new SlapProtocol(host, port, this);
+            this.slapProtocol = newSlapProtocol;
+            newSlapProtocol.connect();
+
+            // The client sends requests as soon as it sees `initialized`, so the managers go first.
+            this.createManagers(newSlapProtocol, this.pathMapper);
 
             // Inform client we're initialized.
             this.debugClient.initialized();
           } catch (final IOException | SlapException exception) {
             throw new CompletionException(exception);
           }
-
-          this.breakpointManager = new BreakpointManager(this.slapProtocol, this.debugClient);
-          this.threadManager =
-              new ThreadManager(this.slapProtocol, this.debugClient, this.pathMapper);
-          this.variableManager = new VariableManager(this.slapProtocol);
         });
+  }
+
+  /**
+   * Create the managers which handle requests and events.
+   *
+   * @param newSlapProtocol Protocol to the agent.
+   * @param newPathMapper Path mapping.
+   */
+  void createManagers(final ISlapProtocol newSlapProtocol, final PathMapper newPathMapper) {
+    this.pathMapper = newPathMapper;
+    this.breakpointManager = new BreakpointManager(newSlapProtocol, this.debugClient);
+    this.threadManager =
+        new ThreadManager(newSlapProtocol, this.debugClient, newPathMapper, this.breakpointManager);
+    this.variableManager = new VariableManager(newSlapProtocol);
   }
 
   @SuppressWarnings("unchecked")
@@ -219,6 +242,11 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
     return CompletableFuture.runAsync(
         () -> {
+          final ThreadManager currentThreadManager = this.threadManager;
+          if (currentThreadManager != null) {
+            currentThreadManager.cancelSteps();
+          }
+
           if (this.slapProtocol != null) {
             try {
               this.slapProtocol.close();
@@ -307,8 +335,12 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     return CompletableFuture.supplyAsync(
         () -> {
           final int reference = args.getVariablesReference();
+          final VariablesArgumentsFilter filter = args.getFilter();
+          final int start = args.getStart() != null ? args.getStart() : 0;
+          final int count = args.getCount() != null ? args.getCount() : 0;
           try {
-            final List<MagikVariable> magikVariables = this.variableManager.getVariables(reference);
+            final List<MagikVariable> magikVariables =
+                this.variableManager.getVariables(reference, filter, start, count);
 
             // Return response.
             final VariablesResponse response = new VariablesResponse();
@@ -522,9 +554,17 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     LOGGER.trace(
         "evaluate, expression: '{}', frame id: {}", args.getExpression(), args.getFrameId());
 
+    final Integer frameId = args.getFrameId();
+    if (frameId == null) {
+      final ResponseError error = new ResponseError();
+      error.setCode(ResponseErrorCode.InvalidParams);
+      error.setMessage(EVALUATE_WITHOUT_FRAME_MESSAGE);
+      final ResponseErrorException exception = new ResponseErrorException(error);
+      return CompletableFuture.failedFuture(exception);
+    }
+
     return CompletableFuture.supplyAsync(
         () -> {
-          final Integer frameId = args.getFrameId();
           final String expression = args.getExpression();
           try {
             // Evaluate in thread/frame.
@@ -594,9 +634,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
    */
   void processEvent(final ISlapEvent event) {
     if (event instanceof BreakpointEvent breakpointEvent) {
-      this.breakpointManager.handleBreakpointEvent(breakpointEvent);
-      this.threadManager.handleBreakpointEvent(breakpointEvent);
-      this.variableManager.handleBreakpointEvent(breakpointEvent);
+      this.processBreakpointEvent(breakpointEvent);
     } else if (event instanceof ThreadStartedEvent threadStartedEvent) {
       this.threadManager.handleThreadStartedEvent(threadStartedEvent);
     } else if (event instanceof ThreadEndedEvent threadEndedEvent) {
@@ -608,5 +646,11 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
       final TerminatedEventArguments args = new TerminatedEventArguments();
       this.debugClient.terminated(args);
     }
+  }
+
+  private void processBreakpointEvent(final BreakpointEvent breakpointEvent) {
+    final VariableManager currentVariableManager = this.variableManager;
+    this.threadManager.handleBreakpointEvent(
+        breakpointEvent, () -> currentVariableManager.handleBreakpointEvent(breakpointEvent));
   }
 }

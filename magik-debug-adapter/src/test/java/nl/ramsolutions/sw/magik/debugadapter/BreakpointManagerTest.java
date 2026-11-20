@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -12,9 +15,13 @@ import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapErrorException;
+import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ErrorResponse;
+import org.eclipse.lsp4j.debug.FunctionBreakpoint;
 import org.eclipse.lsp4j.debug.Source;
 import org.eclipse.lsp4j.debug.SourceBreakpoint;
+import org.eclipse.lsp4j.debug.StoppedEventArguments;
+import org.eclipse.lsp4j.debug.StoppedEventArgumentsReason;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -117,5 +124,72 @@ class BreakpointManagerTest {
     assertThat(breakpoint.getCondition()).isNull();
     assertThat(breakpoint.getMessage()).isEqualTo("METHOD_NOT_FOUND");
     assertThat(breakpoint.getBreakpointId()).isEqualTo(ISlapProtocol.INVALID_BREAKPOINT_ID);
+  }
+
+  private FunctionBreakpoint createFunctionBreakpoint(final String name) {
+    final FunctionBreakpoint functionBreakpoint = new FunctionBreakpoint();
+    functionBreakpoint.setName(name);
+    return functionBreakpoint;
+  }
+
+  @Test
+  void testClearFunctionBreakpoints() throws IOException, InterruptedException, ExecutionException {
+    final List<Long> deletedIds = new ArrayList<>();
+    final TestSlapProtocol slapProtocol =
+        new TestSlapProtocol() {
+          @Override
+          public CompletableFuture<ISlapResponse> deleteBreakpoint(final long breakpointId) {
+            deletedIds.add(breakpointId);
+            return super.deleteBreakpoint(breakpointId);
+          }
+        };
+    final BreakpointManager manager = new BreakpointManager(slapProtocol, null);
+    final FunctionBreakpoint[] functionBreakpoints = {
+      this.createFunctionBreakpoint("user:a.m1()"), this.createFunctionBreakpoint("user:a.m2()")
+    };
+    final List<BreakpointManager.MagikBreakpoint> breakpoints =
+        manager.addFunctionBreakpoints(functionBreakpoints);
+    final long firstId = breakpoints.get(0).getBreakpointId();
+    final long secondId = breakpoints.get(1).getBreakpointId();
+
+    manager.clearFunctionBreakpoints();
+
+    assertThat(deletedIds).containsExactlyInAnyOrder(firstId, secondId);
+    final BreakpointManager.MagikBreakpoint first = manager.getBreakpoint(firstId);
+    assertThat(first).isNull();
+    final BreakpointManager.MagikBreakpoint second = manager.getBreakpoint(secondId);
+    assertThat(second).isNull();
+  }
+
+  @Test
+  void testHandleBreakpointEventUnknownBreakpointId() {
+    final TestSlapProtocol slapProtocol = new TestSlapProtocol();
+    final RecordingDebugProtocolClient client = new RecordingDebugProtocolClient();
+    final BreakpointManager manager = new BreakpointManager(slapProtocol, client);
+
+    final BreakpointEvent event = new BreakpointEvent(99, 3);
+    manager.handleBreakpointEvent(event);
+
+    final List<StoppedEventArguments> stoppedEvents = client.getStoppedEvents();
+    assertThat(stoppedEvents).hasSize(1);
+    final StoppedEventArguments stopped = stoppedEvents.get(0);
+    final Integer stoppedThreadId = stopped.getThreadId();
+    assertThat(stoppedThreadId).isEqualTo(3);
+    final String reason = stopped.getReason();
+    assertThat(reason).isEqualTo(StoppedEventArgumentsReason.BREAKPOINT);
+  }
+
+  @Test
+  void testConditionBreakpointLineIsBreakpointLine()
+      throws IOException, InterruptedException, ExecutionException {
+    final TestSlapProtocol slapProtocol = new TestSlapProtocol();
+    final RecordingDebugProtocolClient client = new RecordingDebugProtocolClient();
+    final BreakpointManager manager = new BreakpointManager(slapProtocol, client);
+    final String[] filters = {"_self.taxonomy.includes?(:error)"};
+    manager.setConditionBreakpoint(filters);
+
+    final Set<Integer> lines = manager.getBreakpointLines("sw:condition.invoke()");
+
+    assertThat(lines).containsExactly(0);
   }
 }

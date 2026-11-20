@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.DisconnectedEvent;
@@ -36,28 +34,16 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("checkstyle:MagicNumber")
 public class SlapProtocol implements ISlapProtocol {
 
-  /** Request future. */
-  static class RequestFuture {
-    private final RequestType requestType;
-    private final CompletableFuture<ISlapResponse> future;
-
-    RequestFuture(final RequestType requestType, final CompletableFuture<ISlapResponse> future) {
-      this.requestType = requestType;
-      this.future = future;
-    }
-
-    @Override
-    public String toString() {
-      return "%s@%s(%s)"
-          .formatted(
-              this.getClass().getName(), Integer.toHexString(this.hashCode()), this.requestType);
-    }
-  }
-
   private static final Logger LOGGER = LoggerFactory.getLogger(SlapProtocol.class);
 
   private static final String DEBUG_CLIENT_ID = "DuckOnATricycle\0";
   private static final String DEBUG_AGENT_ID = "SwanOnAUnicycle\0";
+  private static final int HANDSHAKE_RESPONSE_LENGTH = 32;
+  private static final int INITIAL_INPUT_BUFFER_SIZE = 65536;
+  private static final int MESSAGE_LENGTH_SIZE = 4;
+  private static final int MESSAGE_HEADER_SIZE = 8;
+  // Far above any real reply, below what would exhaust the heap.
+  private static final int MAX_MESSAGE_LENGTH = 64 * 1024 * 1024;
 
   /** State of protocol. */
   enum State {
@@ -78,13 +64,13 @@ public class SlapProtocol implements ISlapProtocol {
   private final InetSocketAddress inetSocketAddress;
   private final SlapEventListener listener;
   private SocketChannel socketChannel;
-  private final ByteBuffer inputBuffer = ByteBuffer.allocate(65536);
+  private ByteBuffer inputBuffer = ByteBuffer.allocate(INITIAL_INPUT_BUFFER_SIZE);
   private ByteOrder byteOrder = ByteOrder.nativeOrder();
   private State state;
   private RequestType multiResponseRequestType;
+  private boolean multiResponseFailed;
   private long version;
-  private final List<RequestFuture> requestFutures =
-      Collections.synchronizedList(new ArrayList<>());
+  private final PendingRequests pendingRequests = new PendingRequests();
   private final List<ISlapResponse> subResponses = new ArrayList<>();
 
   /**
@@ -116,33 +102,47 @@ public class SlapProtocol implements ISlapProtocol {
     this.startReceiverThread();
   }
 
-  @SuppressWarnings("checkstyle:IllegalCatch")
   private void startReceiverThread() {
-    final SlapProtocol protocol = this;
-    final Thread receiverThread =
-        new Thread(
-            () -> {
-              while (true) { // NOSONAR
-                try {
-                  if (!protocol.isConnected()) {
-                    break;
-                  }
-
-                  protocol.handleData();
-                } catch (final IOException exception) {
-                  LOGGER.error(exception.getMessage(), exception);
-                  break;
-                } catch (final Exception exception) {
-                  LOGGER.error(exception.getMessage(), exception);
-                }
-              }
-              final DisconnectedEvent event = new DisconnectedEvent();
-              protocol.listener.handleEvent(event);
-            });
+    final Thread receiverThread = new Thread(this::receiveUntilDisconnected);
     receiverThread.setName("slap-protocol-receiver");
     receiverThread.start();
 
     LOGGER.debug("Started received thread: {}", receiverThread);
+  }
+
+  @SuppressWarnings("checkstyle:IllegalCatch")
+  private void receiveUntilDisconnected() {
+    // A message is skipped on its own failure, anything else leaves the stream in an unknown state.
+    try {
+      boolean received = true;
+      while (received && this.isConnected()) {
+        received = this.handleData();
+      }
+    } catch (final IOException | RuntimeException exception) { // NOSONAR
+      final String message = exception.getMessage();
+      LOGGER.error(message, exception);
+    } finally {
+      this.handleDisconnect();
+    }
+  }
+
+  private void handleDisconnect() {
+    try {
+      this.socketChannel.close();
+    } catch (final IOException exception) {
+      final String message = exception.getMessage();
+      LOGGER.debug(message, exception);
+    }
+
+    this.failPendingRequests();
+
+    final DisconnectedEvent event = new DisconnectedEvent();
+    this.listener.handleEvent(event);
+  }
+
+  private void failPendingRequests() {
+    final SlapException exception = new SlapException("Connection to debug agent closed");
+    this.pendingRequests.failAll(exception);
   }
 
   private void doHandshake() throws IOException, SlapException {
@@ -156,8 +156,13 @@ public class SlapProtocol implements ISlapProtocol {
     // 16-16: uint8 endianness
     // 17-21: uint32 version
     // 22-32: ???
-    final ByteBuffer handshakeResponse = ByteBuffer.allocate(32);
-    this.socketChannel.read(handshakeResponse);
+    final ByteBuffer handshakeResponse = ByteBuffer.allocate(HANDSHAKE_RESPONSE_LENGTH);
+    while (handshakeResponse.hasRemaining()) {
+      final int count = this.socketChannel.read(handshakeResponse);
+      if (count < 0) {
+        throw new SlapException("Connection closed during handshake");
+      }
+    }
     handshakeResponse.flip();
 
     // Test if bouncer answers with the right secret response.
@@ -276,7 +281,7 @@ public class SlapProtocol implements ISlapProtocol {
           requestType,
           param0,
           param1);
-      final CompletableFuture<ISlapResponse> future = this.addFutureRequest(requestType);
+      final CompletableFuture<ISlapResponse> future = this.pendingRequests.add(requestType);
 
       this.socketChannel.write(buffer);
       LOGGER.trace(
@@ -292,26 +297,41 @@ public class SlapProtocol implements ISlapProtocol {
   // endregion
 
   // region: Input handling
-  /** Handle incoming data. Call this regularly. */
-  private void handleData() throws IOException {
-    // Read from socket.
+  /**
+   * Handle incoming data. Call this regularly.
+   *
+   * @return False if the connection has ended, true otherwise.
+   */
+  private boolean handleData() throws IOException {
+    final int count;
     try {
-      this.socketChannel.read(this.inputBuffer);
-    } catch (final AsynchronousCloseException ex) {
-      // Channel has reached end-of-stream.
-      this.socketChannel.close();
-      return;
+      count = this.socketChannel.read(this.inputBuffer);
+    } catch (final ClosedChannelException exception) {
+      // Channel was closed by us.
+      return false;
     }
+    if (count < 0) {
+      LOGGER.debug("Reached end of stream");
+      return false;
+    }
+
+    LOGGER.trace("Received data, byte count: {}", count);
     this.inputBuffer.flip();
+    this.handleBufferedMessages();
+    this.inputBuffer.compact();
+    this.growInputBuffer();
+    return true;
+  }
 
-    final int limit = this.inputBuffer.limit();
-    LOGGER.trace("Received data, byte count: {}", limit);
-
-    while (this.inputBuffer.hasRemaining()) {
+  private void handleBufferedMessages() throws IOException {
+    while (this.inputBuffer.remaining() >= MESSAGE_LENGTH_SIZE) {
       final int startPosition = this.inputBuffer.position();
-      final int bufferLength = this.inputBuffer.limit() - startPosition;
+      final int bufferLength = this.inputBuffer.remaining();
       final int messageLength = (int) ByteBufferHelper.peekUInt32(this.inputBuffer); // byte: 0-4
       LOGGER.trace("Message length: {}, buffer size: {}", messageLength, bufferLength);
+      if (messageLength < MESSAGE_HEADER_SIZE || messageLength > MAX_MESSAGE_LENGTH) {
+        throw new IOException("Invalid message length: " + messageLength);
+      }
       if (bufferLength < messageLength) {
         // Did not receive enough data (yet), wait for more data.
         break;
@@ -326,13 +346,36 @@ public class SlapProtocol implements ISlapProtocol {
               .limit(messageLength)
               .asReadOnlyBuffer()
               .order(order);
-      this.handleMessage(messageBuffer);
+      try {
+        this.handleMessage(messageBuffer);
+      } catch (final RuntimeException exception) { // NOSONAR
+        LOGGER.error("Could not handle message: {}", messageBuffer, exception);
+        this.failMessageRequest(messageBuffer, exception);
+      } finally {
+        // Skip past message.
+        this.inputBuffer.position(startPosition + messageLength);
+      }
+    }
+  }
 
-      // Skip past message.
-      this.inputBuffer.position(startPosition + messageLength);
+  /** Grow the input buffer if it cannot hold the incomplete message at its start. */
+  private void growInputBuffer() {
+    final int pendingLength = this.inputBuffer.position();
+    if (pendingLength < MESSAGE_LENGTH_SIZE) {
+      return;
     }
 
-    this.inputBuffer.compact();
+    final int messageLength = (int) ByteBufferHelper.readUInt32(this.inputBuffer, 0);
+    if (messageLength <= this.inputBuffer.capacity()) {
+      return;
+    }
+
+    LOGGER.debug("Growing input buffer to: {}", messageLength);
+    final ByteBuffer largerBuffer = ByteBuffer.allocate(messageLength);
+    largerBuffer.order(this.inputBuffer.order());
+    this.inputBuffer.flip();
+    largerBuffer.put(this.inputBuffer);
+    this.inputBuffer = largerBuffer;
   }
 
   /**
@@ -346,6 +389,11 @@ public class SlapProtocol implements ISlapProtocol {
     // 04-08: uint32, response type
     final int val = (int) ByteBufferHelper.readUInt32(buffer, 4);
     final ResponseType responseType = ResponseType.valueOf(val);
+    if (responseType == null) {
+      LOGGER.warn("Unknown response type, val: {}", val);
+      return;
+    }
+
     switch (responseType) {
       case ERROR:
         this.handleErrorMessage(buffer);
@@ -376,11 +424,22 @@ public class SlapProtocol implements ISlapProtocol {
     // 04-08: uint32, response type
     // 08-12: uint32, request type
     // 12-16: uint32, 0xFFFFFFFF, if multi-message and stop-message
-    final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
-    final RequestType requestType =
-        this.state == State.WAITING ? RequestType.valueOf(val) : this.multiResponseRequestType;
+    final RequestType requestType = this.determineReplyRequestType(buffer);
+    if (requestType == null) {
+      final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
+      LOGGER.warn("Reply to unknown request type, val: {}", val);
+      return;
+    }
+
     final boolean isEndPacket =
         this.state == State.WAITING_FOR_MULTIPLE_RESPONSES && this.isEndPacket(buffer);
+    if (this.multiResponseFailed) {
+      // The request has failed, skip the rest of its reply.
+      if (isEndPacket) {
+        this.resetMultiResponse();
+      }
+      return;
+    }
 
     final ISlapResponse response;
     switch (requestType) {
@@ -451,7 +510,7 @@ public class SlapProtocol implements ISlapProtocol {
               buffer,
               ByteBufferHelper.toHexDump(buffer));
         }
-        throw new IllegalStateException("Unknown response");
+        return;
     }
 
     LOGGER.trace(
@@ -462,8 +521,64 @@ public class SlapProtocol implements ISlapProtocol {
 
     if (response != null) {
       // Complete future.
-      this.handleFutureRequest(requestType, response);
+      this.pendingRequests.complete(requestType, response);
     }
+  }
+
+  private RequestType determineReplyRequestType(final ByteBuffer buffer) {
+    if (this.state != State.WAITING) {
+      return this.multiResponseRequestType;
+    }
+
+    final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
+    return RequestType.valueOf(val);
+  }
+
+  private void resetMultiResponse() {
+    this.subResponses.clear();
+    this.state = State.WAITING;
+    this.multiResponseRequestType = null;
+    this.multiResponseFailed = false;
+  }
+
+  /**
+   * Fail the request of a reply or error message which could not be handled, events are skipped.
+   *
+   * @param buffer Buffer that contains the message.
+   * @param cause Why the message could not be handled.
+   */
+  private void failMessageRequest(final ByteBuffer buffer, final RuntimeException cause) {
+    if (this.multiResponseFailed || buffer.limit() < MESSAGE_HEADER_SIZE + 4) {
+      return;
+    }
+
+    final int val = (int) ByteBufferHelper.readUInt32(buffer, 4);
+    final ResponseType responseType = ResponseType.valueOf(val);
+    final RequestType requestType;
+    if (responseType == ResponseType.REPLY) {
+      requestType = this.determineReplyRequestType(buffer);
+    } else if (responseType == ResponseType.ERROR) {
+      final int requestVal = (int) ByteBufferHelper.readUInt32(buffer, 8);
+      requestType = RequestType.valueOf(requestVal);
+    } else {
+      return;
+    }
+
+    if (this.state == State.WAITING_FOR_MULTIPLE_RESPONSES && responseType == ResponseType.REPLY) {
+      // Skip the rest of the reply, up to its end.
+      final boolean isEnd = buffer.limit() >= 16 && this.isEndPacket(buffer);
+      if (isEnd) {
+        this.resetMultiResponse();
+      } else {
+        this.subResponses.clear();
+        this.multiResponseFailed = true;
+      }
+    }
+
+    // An unknown request type has no pending request, this logs a warning.
+    final SlapException exception =
+        new SlapException("Could not decode reply to request: " + requestType, cause);
+    this.pendingRequests.fail(requestType, exception);
   }
 
   private ISlapResponse handleMultiGetFrameLocals(
@@ -472,9 +587,7 @@ public class SlapProtocol implements ISlapProtocol {
     if (isEndPacket) {
       // Build final message.
       response = new StackFrameLocalsResponse(this.subResponses);
-      this.subResponses.clear();
-      this.state = State.WAITING;
-      this.multiResponseRequestType = null;
+      this.resetMultiResponse();
     } else {
       response = null;
       final ISlapResponse subResponse = StackFrameLocalsResponse.Local.decode(buffer);
@@ -489,9 +602,7 @@ public class SlapProtocol implements ISlapProtocol {
     if (isEndPacket) {
       // Build final message.
       response = new ThreadStackResponse(this.subResponses);
-      this.subResponses.clear();
-      this.state = State.WAITING;
-      this.multiResponseRequestType = null;
+      this.resetMultiResponse();
     } else {
       response = null;
       final ISlapResponse subResponse = ThreadStackResponse.StackElement.decode(buffer);
@@ -521,6 +632,10 @@ public class SlapProtocol implements ISlapProtocol {
     final EventType eventType = EventType.valueOf(val);
     LOGGER.trace(
         "Thread: {}, Received event: event type: {}", Thread.currentThread().getName(), eventType);
+    if (eventType == null) {
+      LOGGER.warn("Unknown event type, val: {}", val);
+      return;
+    }
 
     ISlapEvent event = null;
     switch (eventType) {
@@ -541,7 +656,8 @@ public class SlapProtocol implements ISlapProtocol {
         break;
 
       default:
-        throw new IllegalStateException("Unknown message");
+        LOGGER.warn("Unhandled event type: {}", eventType);
+        return;
     }
 
     this.listener.handleEvent(event);
@@ -567,7 +683,7 @@ public class SlapProtocol implements ISlapProtocol {
 
     // Complete future.
     final ErrorResponse response = ErrorResponse.decode(buffer);
-    this.handleErrorFutureRequest(requestType, response);
+    this.pendingRequests.completeError(requestType, response);
   }
 
   // endregion
@@ -774,78 +890,4 @@ public class SlapProtocol implements ISlapProtocol {
 
     return this.sendRequest(RequestType.EVALUATE, threadId, level, data);
   }
-
-  // region: Requests/Futures
-  private CompletableFuture<ISlapResponse> addFutureRequest(final RequestType requestType) {
-    final CompletableFuture<ISlapResponse> future = new CompletableFuture<>();
-    final RequestFuture requestFuture = new RequestFuture(requestType, future);
-
-    synchronized (this.requestFutures) {
-      LOGGER.debug(
-          "Thread: {}, added request future: {}", Thread.currentThread().getName(), requestFuture);
-      this.requestFutures.add(requestFuture);
-    }
-
-    return future;
-  }
-
-  private void handleFutureRequest(final RequestType requestType, final ISlapResponse response) {
-    RequestFuture requestFuture = null;
-
-    LOGGER.debug(
-        "Thread: {}, Request type: {}, response: {}, request futures: {}",
-        Thread.currentThread().getName(),
-        requestType,
-        response,
-        this.requestFutures);
-
-    synchronized (this.requestFutures) {
-      final Optional<RequestFuture> first =
-          this.requestFutures.stream().filter(pair -> pair.requestType == requestType).findFirst();
-      if (first.isEmpty()) {
-        LOGGER.warn(
-            "Thread: {}, Trying to handle request, but not available, request type: {}",
-            Thread.currentThread().getName(),
-            requestType);
-        return;
-      }
-
-      requestFuture = first.get();
-      this.requestFutures.remove(requestFuture);
-    }
-
-    requestFuture.future.complete(response);
-  }
-
-  private void handleErrorFutureRequest(
-      final RequestType requestType, final ErrorResponse errorResponse) {
-    RequestFuture requestFuture = null;
-
-    LOGGER.debug(
-        "Thread: {}, Request type: {}, error response: {}, request futures: {}",
-        Thread.currentThread().getName(),
-        requestType,
-        errorResponse,
-        this.requestFutures);
-
-    synchronized (this.requestFutures) {
-      final Optional<RequestFuture> findFirst =
-          this.requestFutures.stream().filter(pair -> pair.requestType == requestType).findFirst();
-      if (findFirst.isEmpty()) {
-        LOGGER.warn(
-            "Thread: {}, Trying to handle request, but not available, request type: {}",
-            Thread.currentThread().getName(),
-            requestType);
-        return;
-      }
-
-      requestFuture = findFirst.get();
-      this.requestFutures.remove(requestFuture);
-    }
-
-    final SlapErrorException exception = new SlapErrorException(errorResponse);
-    requestFuture.future.completeExceptionally(exception);
-  }
-  // endregion
-
 }

@@ -7,21 +7,26 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapErrorException;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.BreakpointSetResponse;
+import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ErrorResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.EvalResponse;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter;
@@ -41,13 +46,56 @@ class BreakpointManager {
   private static final String CONDITION_BREAKPOINT_METHOD = "sw:condition.invoke()";
   private static final String SW_TRUE = "True";
 
+  /** Lets a step take part in the handling of a user breakpoint hit. */
+  interface StopHook {
+
+    /** A hook for a thread which is not stepping. */
+    StopHook NONE =
+        new StopHook() {
+          @Override
+          public void beforeStop() {
+            // Nothing to do.
+          }
+
+          @Override
+          public boolean endStepInsteadOfResume(final MagikBreakpoint magikBreakpoint) {
+            return false;
+          }
+        };
+
+    /** Run when the thread stays stopped, before the client hears of it. */
+    void beforeStop();
+
+    /**
+     * Run instead of resuming a thread whose breakpoint condition is false.
+     *
+     * @param magikBreakpoint Breakpoint which was hit.
+     * @return True if a step ended there, which keeps the thread stopped.
+     */
+    boolean endStepInsteadOfResume(MagikBreakpoint magikBreakpoint);
+  }
+
+  /** Releases a location held by a temporary breakpoint, before a user breakpoint is set there. */
+  interface LocationReleaser {
+
+    /**
+     * Release a location.
+     *
+     * @param methodName Package-qualified method name.
+     * @param line Line, 0 for the method's entry.
+     * @throws IOException -
+     * @throws InterruptedException -
+     */
+    void releaseLocation(String methodName, int line) throws IOException, InterruptedException;
+  }
+
   /** Magik breakpoint. */
   static class MagikBreakpoint {
 
-    private long breakpointId;
+    private volatile long breakpointId;
     private final String methodName;
     private final int methodLine;
-    private String condition;
+    private volatile String condition;
     private String message;
 
     /**
@@ -140,13 +188,26 @@ class BreakpointManager {
 
   private final ISlapProtocol slapProtocol;
   private final IDebugProtocolClient debugClient;
+  // Request threads and event handler threads use this manager at the same time.
+  // `sourceBreakpoints` is guarded by `lock`, which is never held during a SLAP round trip.
+  private final Object lock = new Object();
   private final Map<Source, List<MagikBreakpoint>> sourceBreakpoints = new HashMap<>();
-  private MagikBreakpoint conditionBreakpoint;
-  private final Map<Long, MagikBreakpoint> breakpointIds = new HashMap<>();
+  private volatile MagikBreakpoint conditionBreakpoint;
+  private final Map<Long, MagikBreakpoint> breakpointIds = new ConcurrentHashMap<>();
+  private volatile LocationReleaser locationReleaser = (methodName, line) -> {};
 
   BreakpointManager(final ISlapProtocol slapProtocol, final IDebugProtocolClient debugClient) {
     this.slapProtocol = slapProtocol;
     this.debugClient = debugClient;
+  }
+
+  /**
+   * Set the releaser of locations held by temporary breakpoints.
+   *
+   * @param newLocationReleaser Location releaser.
+   */
+  void setLocationReleaser(final LocationReleaser newLocationReleaser) {
+    this.locationReleaser = newLocationReleaser;
   }
 
   /**
@@ -162,35 +223,44 @@ class BreakpointManager {
   public List<MagikBreakpoint> setBreakpoints(
       final Source source, final SourceBreakpoint[] newSourceBreakpoints)
       throws IOException, InterruptedException, ExecutionException {
-    // Get all current breakpoints.
-    final List<MagikBreakpoint> breakpoints =
-        this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
+    final List<SourceBreakpoint> addedBreakpoints;
+    final List<MagikBreakpoint> removedBreakpoints;
+    synchronized (this.lock) {
+      // Get all current breakpoints.
+      final List<MagikBreakpoint> breakpoints =
+          this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
 
-    // Add new breakpoints.
-    final List<Integer> magikBreakpointLines =
-        breakpoints.stream().map(MagikBreakpoint::getMethodLine).toList();
-    final List<SourceBreakpoint> addedBreakpoints =
-        Arrays.stream(newSourceBreakpoints)
-            .filter(breakpoint -> !magikBreakpointLines.contains(breakpoint.getLine()))
-            .toList();
+      // Find new breakpoints.
+      final List<Integer> magikBreakpointLines =
+          breakpoints.stream().map(MagikBreakpoint::getMethodLine).toList();
+      addedBreakpoints =
+          Arrays.stream(newSourceBreakpoints)
+              .filter(breakpoint -> !magikBreakpointLines.contains(breakpoint.getLine()))
+              .toList();
+
+      // Find old breakpoints.
+      final List<Integer> sourceBreakpointLines =
+          Arrays.stream(newSourceBreakpoints).map(SourceBreakpoint::getLine).toList();
+      removedBreakpoints =
+          breakpoints.stream()
+              .filter(
+                  magikBreakpoint ->
+                      !sourceBreakpointLines.contains(magikBreakpoint.getMethodLine()))
+              .toList();
+    }
+
     for (final SourceBreakpoint sourceBreakpoint : addedBreakpoints) {
       this.addBreakpoint(source, sourceBreakpoint);
     }
-
-    // Remove old breakpoints.
-    final List<Integer> sourceBreakpointLines =
-        Arrays.stream(newSourceBreakpoints).map(SourceBreakpoint::getLine).toList();
-    final List<MagikBreakpoint> removedBreakpoints =
-        breakpoints.stream()
-            .filter(
-                magikBreakpoint -> !sourceBreakpointLines.contains(magikBreakpoint.getMethodLine()))
-            .toList();
     for (final MagikBreakpoint magikBreakpoint : removedBreakpoints) {
       this.removeBreakpoint(source, magikBreakpoint);
     }
 
-    // breakpoints gets updated through addBreakpoint/removeBreakpoint.
-    return breakpoints;
+    // The registered breakpoints are updated through addBreakpoint/removeBreakpoint.
+    synchronized (this.lock) {
+      final List<MagikBreakpoint> breakpoints = this.sourceBreakpoints.get(source);
+      return new ArrayList<>(breakpoints);
+    }
   }
 
   /**
@@ -230,9 +300,12 @@ class BreakpointManager {
     final long breakpointId = magikBreakpoint.getBreakpointId();
     this.breakpointIds.remove(breakpointId);
 
-    final List<MagikBreakpoint> breakpoints =
-        this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
-    breakpoints.remove(magikBreakpoint);
+    synchronized (this.lock) {
+      final List<MagikBreakpoint> breakpoints = this.sourceBreakpoints.get(source);
+      if (breakpoints != null) {
+        breakpoints.remove(magikBreakpoint);
+      }
+    }
   }
 
   // endregion
@@ -242,8 +315,13 @@ class BreakpointManager {
   void clearFunctionBreakpoints() throws IOException, InterruptedException, ExecutionException {
     final Source source = null; // A function breakpoint has no source.
 
-    final List<MagikBreakpoint> magikBreakpoints =
-        this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
+    // Iterate over a copy, removing a breakpoint changes the registered list.
+    final List<MagikBreakpoint> magikBreakpoints;
+    synchronized (this.lock) {
+      final List<MagikBreakpoint> registered =
+          this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
+      magikBreakpoints = new ArrayList<>(registered);
+    }
     for (final MagikBreakpoint magikBreakpoint : magikBreakpoints) {
       this.removeBreakpoint(source, magikBreakpoint);
     }
@@ -299,12 +377,12 @@ class BreakpointManager {
    */
   MagikBreakpoint clearConditionBreakpoint()
       throws IOException, InterruptedException, ExecutionException {
-    if (this.conditionBreakpoint != null) {
-      final long breakpointId = this.conditionBreakpoint.getBreakpointId();
+    final MagikBreakpoint currentConditionBreakpoint = this.conditionBreakpoint;
+    if (currentConditionBreakpoint != null) {
+      final long breakpointId = currentConditionBreakpoint.getBreakpointId();
       this.slapProtocol.deleteBreakpoint(breakpointId).get();
     }
 
-    final MagikBreakpoint currentConditionBreakpoint = this.conditionBreakpoint;
     this.conditionBreakpoint = null;
     return currentConditionBreakpoint;
   }
@@ -320,26 +398,31 @@ class BreakpointManager {
    */
   MagikBreakpoint setConditionBreakpoint(final String[] filters)
       throws IOException, InterruptedException, ExecutionException {
-    if (this.conditionBreakpoint != null && filters.length == 0) {
+    final MagikBreakpoint currentConditionBreakpoint = this.conditionBreakpoint;
+    if (currentConditionBreakpoint != null && filters.length == 0) {
       return this.clearConditionBreakpoint();
     }
 
-    // Ensure there is a breakpoint.
-    if (this.conditionBreakpoint == null && filters.length != 0) {
-      this.conditionBreakpoint = this.sendSetBreakpoint(CONDITION_BREAKPOINT_METHOD, 0);
+    final String condition;
+    if (filters.length != 0) {
+      condition = Arrays.stream(filters).collect(Collectors.joining(" _orif "));
+    } else {
+      condition = null;
     }
 
-    // Set condition for breakpoint.
-    if (this.conditionBreakpoint != null) {
-      if (filters.length != 0) {
-        final String condition = Arrays.stream(filters).collect(Collectors.joining(" _orif "));
-        this.conditionBreakpoint.setCondition(condition);
-      } else {
-        this.conditionBreakpoint.setCondition(null);
-      }
+    // Ensure there is a breakpoint, with its condition set before it is published.
+    if (currentConditionBreakpoint == null && filters.length != 0) {
+      final MagikBreakpoint newConditionBreakpoint =
+          this.sendSetBreakpoint(CONDITION_BREAKPOINT_METHOD, 0);
+      newConditionBreakpoint.setCondition(condition);
+      this.conditionBreakpoint = newConditionBreakpoint;
+      return newConditionBreakpoint;
     }
 
-    return this.conditionBreakpoint;
+    if (currentConditionBreakpoint != null) {
+      currentConditionBreakpoint.setCondition(condition);
+    }
+    return currentConditionBreakpoint;
   }
 
   // endregion
@@ -348,15 +431,47 @@ class BreakpointManager {
    * Get a breakpoint by its ID.
    *
    * @param breakpointId Breakpoint ID.
-   * @return Breakpoint for ID.
+   * @return Breakpoint for ID, or null if the ID is not known.
    */
+  @CheckForNull
   MagikBreakpoint getBreakpoint(final long breakpointId) {
-    if (this.conditionBreakpoint != null
-        && this.conditionBreakpoint.getBreakpointId() == breakpointId) {
-      return this.conditionBreakpoint;
+    final MagikBreakpoint currentConditionBreakpoint = this.conditionBreakpoint;
+    if (currentConditionBreakpoint != null
+        && currentConditionBreakpoint.getBreakpointId() == breakpointId) {
+      return currentConditionBreakpoint;
     }
 
     return this.breakpointIds.get(breakpointId);
+  }
+
+  /**
+   * Get the lines of a method which hold a verified user breakpoint.
+   *
+   * @param methodName Package-qualified method name.
+   * @return Lines, 0 stands for the method's entry.
+   */
+  Set<Integer> getBreakpointLines(final String methodName) {
+    final List<MagikBreakpoint> magikBreakpoints = new ArrayList<>();
+    synchronized (this.lock) {
+      final Collection<List<MagikBreakpoint>> breakpointLists = this.sourceBreakpoints.values();
+      breakpointLists.forEach(magikBreakpoints::addAll);
+    }
+    final MagikBreakpoint currentConditionBreakpoint = this.conditionBreakpoint;
+    if (currentConditionBreakpoint != null) {
+      magikBreakpoints.add(currentConditionBreakpoint);
+    }
+
+    return magikBreakpoints.stream()
+        .filter(MagikBreakpoint::isVerified)
+        .filter(magikBreakpoint -> this.isBreakpointInMethod(magikBreakpoint, methodName))
+        .map(MagikBreakpoint::getMethodLine)
+        .collect(Collectors.toSet());
+  }
+
+  private boolean isBreakpointInMethod(
+      final MagikBreakpoint magikBreakpoint, final String methodName) {
+    final String breakpointMethodName = magikBreakpoint.getMethodName();
+    return breakpointMethodName.equals(methodName);
   }
 
   // region: Event handling
@@ -366,38 +481,83 @@ class BreakpointManager {
    * @param breakpointEvent event.
    */
   void handleBreakpointEvent(final BreakpointEvent breakpointEvent) {
+    this.handleBreakpointEvent(breakpointEvent, StopHook.NONE);
+  }
+
+  /**
+   * Handle a {@link BreakpointEvent}.
+   *
+   * @param breakpointEvent event.
+   * @param stopHook Hook for a step of the thread.
+   */
+  void handleBreakpointEvent(final BreakpointEvent breakpointEvent, final StopHook stopHook) {
     final long threadId = breakpointEvent.getThreadId();
 
     // If conditional breakpoint, then test condition and optionally continue.
     final long breakpointId = breakpointEvent.getBreakpointId();
     final MagikBreakpoint magikBreakpoint = this.getBreakpoint(breakpointId);
-    final String condition = magikBreakpoint.getCondition();
-    if (condition != null) {
-      try {
-        final EvalResponse eval =
-            (EvalResponse) this.slapProtocol.evaluate(threadId, 0, condition).get();
-        final String result = eval.getResult();
-        if (!result.equals(SW_TRUE)) {
-          this.slapProtocol.resumeThread(threadId).get();
-          return;
-        }
-      } catch (final InterruptedException exception) {
-        LOGGER.warn("Interrupted!", exception);
-        Thread.currentThread().interrupt();
-      } catch (final ExecutionException | IOException exception) {
-        // Could not execute, pretend nothing happened.
-      }
+    if (magikBreakpoint != null
+        && this.isConditionFalse(magikBreakpoint, threadId)
+        && this.resumeUnlessStepEnds(magikBreakpoint, threadId, stopHook)) {
+      return;
     }
 
+    stopHook.beforeStop();
     final StoppedEventArguments args = new StoppedEventArguments();
     args.setThreadId((int) threadId);
     args.setReason(StoppedEventArgumentsReason.BREAKPOINT);
     this.debugClient.stopped(args);
   }
 
-  // endergion
+  // endregion
 
   // region: Internals
+  private boolean isConditionFalse(final MagikBreakpoint magikBreakpoint, final long threadId) {
+    final String condition = magikBreakpoint.getCondition();
+    if (condition == null) {
+      return false;
+    }
+
+    try {
+      final CompletableFuture<ISlapResponse> evalFuture =
+          this.slapProtocol.evaluate(threadId, 0, condition);
+      final EvalResponse eval = (EvalResponse) evalFuture.get();
+      final String result = eval.getResult();
+      return !result.equals(SW_TRUE);
+    } catch (final InterruptedException exception) {
+      LOGGER.warn("Interrupted!", exception);
+      Thread.currentThread().interrupt();
+    } catch (final ExecutionException | IOException exception) {
+      // Could not execute, pretend nothing happened.
+    }
+    return false;
+  }
+
+  /**
+   * Resume a thread whose breakpoint condition is false, unless its step ends there.
+   *
+   * @return True if the thread was resumed or its step ended, false if it could not be resumed.
+   */
+  private boolean resumeUnlessStepEnds(
+      final MagikBreakpoint magikBreakpoint, final long threadId, final StopHook stopHook) {
+    if (stopHook.endStepInsteadOfResume(magikBreakpoint)) {
+      return true;
+    }
+
+    try {
+      final CompletableFuture<ISlapResponse> resumeFuture =
+          this.slapProtocol.resumeThread(threadId);
+      resumeFuture.get();
+      return true;
+    } catch (final InterruptedException exception) {
+      LOGGER.warn("Interrupted!", exception);
+      Thread.currentThread().interrupt();
+    } catch (final ExecutionException | IOException exception) {
+      LOGGER.debug("Could not resume thread: {}", threadId, exception);
+    }
+    return false;
+  }
+
   private AstNode getNode(final Source source, final int line) {
     final Path path = Path.of(source.getPath());
     final MagikParser parser = new MagikParser();
@@ -422,9 +582,11 @@ class BreakpointManager {
     }
 
     // Register breakpoint.
-    final List<MagikBreakpoint> breakpoints =
-        this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
-    breakpoints.add(magikBreakpoint);
+    synchronized (this.lock) {
+      final List<MagikBreakpoint> breakpoints =
+          this.sourceBreakpoints.computeIfAbsent(source, key -> new ArrayList<>());
+      breakpoints.add(magikBreakpoint);
+    }
 
     return magikBreakpoint;
   }
@@ -434,6 +596,8 @@ class BreakpointManager {
     LOGGER.trace("Send set breakpoint: method: {}, line: {}", method, line);
 
     final MagikBreakpoint magikBreakpoint = new MagikBreakpoint(method, line);
+    // A location which holds a temporary breakpoint refuses another one.
+    this.locationReleaser.releaseLocation(method, line);
 
     try {
       final CompletableFuture<ISlapResponse> breakpointSetFuture =
@@ -447,7 +611,9 @@ class BreakpointManager {
       final Throwable cause = exception.getCause();
       if (cause instanceof SlapErrorException slapErrorException) {
         // Do nothing, verified will become false, error will be shown to user.
-        final String message = slapErrorException.getError().getErrorMessage().name();
+        final ErrorResponse error = slapErrorException.getError();
+        final ErrorMessage errorMessage = error.getErrorMessage();
+        final String message = errorMessage.name();
         magikBreakpoint.setMessage(message);
 
         LOGGER.trace("Unable to create breakpoint: {}, reason: {}", magikBreakpoint, message);
