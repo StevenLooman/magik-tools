@@ -1,8 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -15,6 +18,11 @@ class AtomHandler extends LocalTypeReasonerHandler {
 
   @SuppressWarnings("checkstyle:MagicNumber")
   private static final long BIGNUM_START = 1 << 29;
+
+  private static final TypeString SW_RATIONAL =
+      TypeString.ofIdentifier("rational", TypeString.SW_PACKAGE);
+
+  private static final Pattern NEGATIVE_EXPONENT_PATTERN = Pattern.compile("(\\d+)[eE&]-(\\d+)");
 
   /**
    * Constructor.
@@ -59,6 +67,14 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handleNumber(final AstNode node) {
     final String tokenValue = node.getTokenValue();
+    final Matcher negativeExponentMatcher =
+        AtomHandler.NEGATIVE_EXPONENT_PATTERN.matcher(tokenValue);
+    if (negativeExponentMatcher.matches()) {
+      final TypeString typeStr = AtomHandler.typeOfNegativeExponent(negativeExponentMatcher);
+      this.assignAtom(node, typeStr);
+      return;
+    }
+
     final Number number = MagikNumberParser.parseMagikNumberSafe(tokenValue);
     if (number instanceof final Integer numberInt) {
       if (numberInt < AtomHandler.BIGNUM_START) {
@@ -71,6 +87,37 @@ class AtomHandler extends LocalTypeReasonerHandler {
     } else if (number instanceof Double) {
       this.assignAtom(node, TypeString.SW_FLOAT);
     }
+  }
+
+  /**
+   * Type a number literal without a decimal point and with a negative exponent. Smallworld reads it
+   * exactly: an integral value is an integer or bignum, any other value a rational.
+   *
+   * @param matcher Matched {@code NEGATIVE_EXPONENT_PATTERN}.
+   * @return {@code sw:integer}/{@code sw:bignum}/{@code sw:rational}.
+   */
+  private static TypeString typeOfNegativeExponent(final Matcher matcher) {
+    final String mantissaDigits = matcher.group(1);
+    final BigDecimal mantissa = new BigDecimal(mantissaDigits);
+    final String exponentDigits = matcher.group(2);
+    final BigInteger exponent = new BigInteger(exponentDigits);
+    final int mantissaPrecision = mantissa.precision();
+    final BigInteger precision = BigInteger.valueOf(mantissaPrecision);
+    // An exponent beyond the mantissa's digits leaves a fraction, and may not fit an int.
+    if (exponent.compareTo(precision) > 0) {
+      return mantissa.signum() == 0 ? TypeString.SW_INTEGER : AtomHandler.SW_RATIONAL;
+    }
+
+    final int places = exponent.intValue();
+    final BigDecimal shifted = mantissa.movePointLeft(places);
+    final BigDecimal value = shifted.stripTrailingZeros();
+    if (value.scale() > 0) {
+      return AtomHandler.SW_RATIONAL;
+    }
+
+    final BigInteger integralValue = value.toBigInteger();
+    final BigInteger bignumStart = BigInteger.valueOf(AtomHandler.BIGNUM_START);
+    return integralValue.compareTo(bignumStart) < 0 ? TypeString.SW_INTEGER : TypeString.SW_BIGNUM;
   }
 
   /**

@@ -154,6 +154,107 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testReasonFractionalExponentLiteralIsRational() {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            _return 1e-3
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert sw:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final TypeString rational = TypeString.ofIdentifier("rational", TypeString.SW_PACKAGE);
+    final ExpressionResultString expected = new ExpressionResultString(rational);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testReasonIntegralExponentLiteralIsInteger() {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            _return 10e-1
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert sw:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_INTEGER);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testReasonLargeIntegralExponentLiteralIsBignum() {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            _return 21474836480e-1
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert sw:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_BIGNUM);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testReasonDecimalExponentLiteralIsFloat() {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            _return 1.5e-1
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert sw:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_FLOAT);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
   void testReasonMethodSelf() {
     final String code =
         """
