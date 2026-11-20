@@ -1636,6 +1636,47 @@ class MagikDefinitionReaderTest {
   }
 
   @Test
+  void testGlobalStatementReadInMethodDefinesNothing() {
+    final String code =
+        """
+        _method a.b
+        	_global g
+        	_global h, i
+        	_return g, h, i
+        _endmethod
+        """;
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    final List<MagikDefinition> globalDefinitions =
+        definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
+    assertThat(globalDefinitions).isEmpty();
+  }
+
+  @Test
+  void testGlobalStatementAssignedInMethodDefinesIt() {
+    final String code =
+        """
+        _method a.b
+        	_global g, h, i
+        	g << 1
+        	h +<< 1
+        	_return i
+        _endmethod
+        """;
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    final List<TypeString> globalNames =
+        definitions.stream()
+            .filter(GlobalDefinition.class::isInstance)
+            .map(GlobalDefinition.class::cast)
+            .map(GlobalDefinition::getTypeString)
+            .toList();
+    final TypeString gName = TypeString.ofIdentifier("g", "user");
+    final TypeString hName = TypeString.ofIdentifier("h", "user");
+    assertThat(globalNames).containsExactly(gName, hName);
+  }
+
+  @Test
   void testGlobalProcedureIsIndexedAsProcedureOnly() {
     final String code = "_global my_proc << _proc() _endproc";
     final MagikFile magikFile = this.createMagikFile(code);

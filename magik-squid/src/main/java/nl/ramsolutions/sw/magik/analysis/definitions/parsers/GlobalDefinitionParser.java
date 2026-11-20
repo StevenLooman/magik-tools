@@ -1,9 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -11,8 +13,12 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.Provenance;
+import nl.ramsolutions.sw.magik.analysis.helpers.AssignmentExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
+import nl.ramsolutions.sw.magik.analysis.scope.Scope;
+import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
@@ -60,6 +66,32 @@ public class GlobalDefinitionParser {
       throw new IllegalStateException();
     }
 
+    final List<AstNode> variableDefinitionNodes =
+        this.node.getChildren(MagikGrammar.VARIABLE_DEFINITION);
+    final List<MagikDefinition> definitions = new ArrayList<>();
+    for (final AstNode variableDefinitionNode : variableDefinitionNodes) {
+      final GlobalDefinition definition = this.parseDefinition(variableDefinitionNode);
+      if (definition != null) {
+        definitions.add(definition);
+      }
+    }
+    return definitions;
+  }
+
+  @CheckForNull
+  private GlobalDefinition parseDefinition(final AstNode variableDefinitionNode) {
+    final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
+    final AstNode valueNode = variableDefinitionNode.getFirstChild(MagikGrammar.EXPRESSION);
+    if (valueNode == null && !this.isAssignedInScope(identifierNode)) {
+      // Without a value, which only a body allows, the statement declares a use of the global.
+      return null;
+    }
+    if (GlobalDefinitionParser.isNamedProcedureValue(valueNode)) {
+      // The procedure is indexed under this very name; a global alias would duplicate it and
+      // `resolveInPackageHierarchy` would combine both into `_undefined|<procedure>`.
+      return null;
+    }
+
     // Figure location.
     final URI uri = this.node.getToken().getURI();
     final Location location = new Location(uri, this.node);
@@ -74,16 +106,6 @@ public class GlobalDefinitionParser {
 
     // Figure name.
     final String packageName = this.getCurrentPakkage();
-    final AstNode variableDefinitionNode =
-        this.node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION);
-    final AstNode valueNode = variableDefinitionNode.getFirstChild(MagikGrammar.EXPRESSION);
-    if (GlobalDefinitionParser.isNamedProcedureValue(valueNode)) {
-      // The procedure is indexed under this very name; a global alias would duplicate it and
-      // `resolveInPackageHierarchy` would combine both into `_undefined|<procedure>`.
-      return List.of();
-    }
-
-    final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
     final String identifier = identifierNode.getTokenValue();
     final TypeString typeName = TypeString.ofIdentifier(identifier, packageName);
 
@@ -126,7 +148,20 @@ public class GlobalDefinitionParser {
             usages.conditions(),
             usages.binaryOperators(),
             Provenance.UNKNOWN);
-    return List.of(globalDefinition);
+    return globalDefinition;
+  }
+
+  /** A {@code _global} without a value defines the global when its scope assigns it. */
+  private boolean isAssignedInScope(final AstNode identifierNode) {
+    final GlobalScope globalScope = this.magikFile.getGlobalScope();
+    final Scope scope = globalScope.getScopeForNode(identifierNode);
+    final ScopeEntry scopeEntry = scope != null ? scope.getScopeEntry(identifierNode) : null;
+    if (scopeEntry == null) {
+      return false;
+    }
+
+    final List<AstNode> usageNodes = scopeEntry.getUsages();
+    return usageNodes.stream().anyMatch(AssignmentExpressionNodeHelper::isAssignmentTarget);
   }
 
   private String getCurrentPakkage() {

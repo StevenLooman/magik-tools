@@ -12,3 +12,4 @@ _endmethod
 $
 </pre>
 <p>In the above example, we are trying to compare two different types: <code>sw:integer</code> and <code>sw:unset</code>. Given that the type definition of <code>param1</code> is <code>sw:integer</code>, it can never be <code>sw:unset</code>.</p>
+<p>In a method, <code>_self</code> can match the method's exemplar and its subtypes: <code>_self _is an_exemplar</code> is not reported there, <code>_self _is _unset</code> is. A global can be <code>_unset</code> until the file defining it is loaded, and a <code>_dynamic</code> without a value inherits whatever is bound, so <code>an_exemplar _isnt _unset</code> is not reported.</p>

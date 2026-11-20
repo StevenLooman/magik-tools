@@ -1,8 +1,12 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.GlobalDefinitionParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -23,7 +27,33 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
   private static final String MESSAGE = "Unknown global: %s";
   private static final String DEFAULT_PACKAGE = "user";
 
+  private final Set<TypeString> declaredGlobals = new HashSet<>();
   private String currentPakkage = DEFAULT_PACKAGE;
+
+  /** Compiling a {@code _global} statement creates the global when no such global exists yet. */
+  @Override
+  protected void walkPreMagik(final AstNode node) {
+    this.declaredGlobals.clear();
+    final List<AstNode> statementNodes =
+        node.getDescendants(MagikGrammar.VARIABLE_DEFINITION_STATEMENT);
+    for (final AstNode statementNode : statementNodes) {
+      if (GlobalDefinitionParser.isGlobalDefinition(statementNode)) {
+        this.addDeclaredGlobals(statementNode);
+      }
+    }
+  }
+
+  private void addDeclaredGlobals(final AstNode statementNode) {
+    final PackageNodeHelper helper = new PackageNodeHelper(statementNode);
+    final String pakkage = helper.getCurrentPackage();
+    final List<AstNode> variableNodes = statementNode.getChildren(MagikGrammar.VARIABLE_DEFINITION);
+    for (final AstNode variableNode : variableNodes) {
+      final AstNode identifierNode = variableNode.getFirstChild(MagikGrammar.IDENTIFIER);
+      final String identifier = identifierNode.getTokenValue();
+      final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
+      this.declaredGlobals.add(typeString);
+    }
+  }
 
   @Override
   protected void walkPostPackageSpecification(final AstNode node) {
@@ -54,7 +84,7 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final String identifier = node.getTokenValue();
     final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-    if (resolver.hasTypeDefinition(typeString)) {
+    if (this.declaredGlobals.contains(typeString) || resolver.hasTypeDefinition(typeString)) {
       return;
     }
 

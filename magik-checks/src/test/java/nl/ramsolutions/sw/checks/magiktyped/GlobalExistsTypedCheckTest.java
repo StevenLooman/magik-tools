@@ -27,4 +27,48 @@ class GlobalExistsTypedCheckTest {
     final MagikTypedCheck check = new GlobalExistsTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testGlobalDeclaredInMethod() {
+    // Compiling `_global abc` creates `abc` when no such global exists yet.
+    final String code =
+        """
+        _method a.m()
+          _global abc
+          _return abc
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final MagikTypedCheck check = new GlobalExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testGlobalDeclaredInOtherMethodOfFile() {
+    final String code =
+        """
+        _method a.m1()
+          _global abc
+          _return abc
+        _endmethod
+
+        _method a.m2()
+          _return abc
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final MagikTypedCheck check = new GlobalExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testUnknownGlobalInGlobalValue() {
+    final String code = "_global g << abc";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final MagikTypedCheck check = new GlobalExistsTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }
