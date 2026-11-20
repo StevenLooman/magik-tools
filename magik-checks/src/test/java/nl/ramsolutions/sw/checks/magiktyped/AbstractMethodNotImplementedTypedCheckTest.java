@@ -262,6 +262,47 @@ class AbstractMethodNotImplementedTypedCheckTest {
   }
 
   @Test
+  void testAbstractMethodRedeclaredAbstractInUsingPackage() {
+    final String code = "def_slotted_exemplar(:child, {}, :parent)\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(
+        definitionKeeper, TYPE_PARENT, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    this.addMethod(
+        definitionKeeper,
+        TYPE_PARENT,
+        "do_something()",
+        EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_PARENT));
+    final TypeString spelledChild = TypeString.ofIdentifier("child", "user");
+    this.addMethod(
+        definitionKeeper,
+        spelledChild,
+        "do_something()",
+        EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
+    final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testAbstractMethodWrittenInUsingPackageNotImplemented() {
+    final String code = "def_slotted_exemplar(:child, {}, :parent)\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(
+        definitionKeeper, TYPE_PARENT, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    final TypeString spelledParent = TypeString.ofIdentifier("parent", "user");
+    this.addMethod(
+        definitionKeeper,
+        spelledParent,
+        "do_something()",
+        EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_PARENT));
+    final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
   void testAbstractMethodRedeclaredAbstractGrandchildNotImplemented() {
     final String code = "def_slotted_exemplar(:grandchild, {}, :child)\n";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

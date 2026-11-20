@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.languageserver.references;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -40,15 +39,13 @@ final class TypeReferencesFinder {
       return Collections.emptyList();
     }
 
-    // TODO: We need to resolve the referenced types, as the indexed globals might not have the
-    // right (unresolved) package. I.e., We might need to match only on identifier, as the
-    // usedGlobal might have a different package? This is because the ref might be stored with the
-    // current package.
-    final Collection<GlobalUsage> wantedGlobalUsages =
-        searchedTypes.stream()
-            .map(wantedTypeRef -> new GlobalUsage(wantedTypeRef, null, null))
-            .collect(Collectors.toSet());
-    final Predicate<GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
+    // A usage is filed under the name as written in its file's package, so resolve it.
+    final Predicate<GlobalUsage> filterPredicate =
+        usage -> {
+          final TypeString usedTypeStr = usage.getTypeName();
+          return searchedTypes.stream()
+              .anyMatch(searchedType -> resolver.isSameType(usedTypeStr, searchedType));
+        };
 
     // Find references.
     // TODO: Also parameters, return types of methods/procedures.

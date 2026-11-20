@@ -461,6 +461,22 @@ public class TypeStringResolver {
   }
 
   /**
+   * Get the {@link MethodDefinition}s a type defines itself, inherited ones excluded: those kept
+   * under its own type string and under each other package's name for it, such as {@code user:a}
+   * for {@code sw:a} when {@code user} uses {@code sw} and has no {@code a} of its own.
+   *
+   * @param typeString {@link TypeString} to get the methods of.
+   * @return The type's own {@link MethodDefinition}s.
+   */
+  public synchronized Collection<MethodDefinition> getOwnMethodDefinitions(
+      final TypeString typeString) {
+    final TypeString actualTypeStr = this.getResolvedTypeString(typeString);
+    return this.getSpellings(actualTypeStr).stream()
+        .flatMap(ownTypeStr -> this.definitionKeeper.getMethodDefinitions(ownTypeStr).stream())
+        .collect(Collectors.toSet());
+  }
+
+  /**
    * A type string, the type it resolves to, and every other spelling of that type: {@code P:N} for
    * a package {@code P} whose uses resolve {@code N} to it. A method written as {@code _method
    * N.m()} in a file of package {@code P} is kept under {@code P:N}.

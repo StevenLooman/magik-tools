@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -75,15 +74,13 @@ public class AbstractMethodNotImplementedTypedCheck extends MagikTypedCheck {
         resolver.getRespondingMethodDefinitions(typeStr, methodName);
     final TypeString resolvedTypeStr =
         AbstractMethodNotImplementedTypedCheck.resolve(resolver, typeStr);
-    final TypeString bareTypeStr = resolvedTypeStr.getWithoutGenerics();
     return implementations.stream()
         .anyMatch(
             methodDef -> {
               final Set<MethodDefinition.Modifier> modifiers = methodDef.getModifiers();
               final boolean isAbstract = modifiers.contains(MethodDefinition.Modifier.ABSTRACT);
               final TypeString ownerTypeStr = methodDef.getTypeName();
-              final TypeString bareOwnerTypeStr = ownerTypeStr.getWithoutGenerics();
-              return !isAbstract || bareOwnerTypeStr.equals(bareTypeStr);
+              return !isAbstract || resolver.isSameType(ownerTypeStr, resolvedTypeStr);
             });
   }
 
@@ -91,8 +88,7 @@ public class AbstractMethodNotImplementedTypedCheck extends MagikTypedCheck {
       final TypeStringResolver resolver, final TypeString typeStr) {
     final TypeString resolvedTypeStr =
         AbstractMethodNotImplementedTypedCheck.resolve(resolver, typeStr);
-    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
-    return definitionKeeper.getMethodDefinitions(resolvedTypeStr);
+    return resolver.getOwnMethodDefinitions(resolvedTypeStr);
   }
 
   private static TypeString resolve(final TypeStringResolver resolver, final TypeString typeStr) {

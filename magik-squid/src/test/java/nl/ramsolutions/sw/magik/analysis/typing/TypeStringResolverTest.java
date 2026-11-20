@@ -1098,6 +1098,29 @@ class TypeStringResolverTest {
   }
 
   @Test
+  void testOwnMethodDefinitionsIncludeMethodWrittenInUsingPackage() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getOwnMethodDefinitions(SW_A_REF);
+    final Set<TypeString> ownerTypeStrs =
+        methodDefinitions.stream().map(MethodDefinition::getTypeName).collect(Collectors.toSet());
+    assertThat(ownerTypeStrs).containsExactly(USER_A_REF);
+  }
+
+  @Test
+  void testOwnMethodDefinitionsExcludeInheritedMethods() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, SW_B_REF, SW_A_REF);
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getOwnMethodDefinitions(SW_B_REF);
+    assertThat(methodDefinitions).isEmpty();
+  }
+
+  @Test
   void testIsSameTypeThroughUsingPackage() {
     final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
 

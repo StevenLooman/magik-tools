@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -122,10 +123,20 @@ public class TypeHierarchyProvider {
     final TypeString searchedTypeString = resolver.getExemplarTypeString(typeString);
     final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);
     return this.definitionKeeper.getExemplarDefinitions().stream()
-        .filter(def -> resolver.getParents(def.getTypeString()).contains(searchedTypeString))
+        .filter(def -> this.isChildOf(resolver, def, searchedTypeString))
         .map(this::toTypeHierarchyItem)
         .sorted(byName)
         .toList();
+  }
+
+  /** Whether a parent of the exemplar, as named in its file's package, is the searched type. */
+  private boolean isChildOf(
+      final TypeStringResolver resolver,
+      final ExemplarDefinition definition,
+      final TypeString searchedTypeString) {
+    final TypeString typeString = definition.getTypeString();
+    final Collection<TypeString> parents = resolver.getParents(typeString);
+    return parents.stream().anyMatch(parent -> resolver.isSameType(parent, searchedTypeString));
   }
 
   /**

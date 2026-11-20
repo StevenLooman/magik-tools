@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver.rename;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -22,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.MethodUsageLocator;
 import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -66,10 +69,14 @@ class MethodRenamer extends Renamer {
       return Collections.emptyMap();
     }
 
-    // Get method definition(s) to rename.
-    final IDefinitionKeeper definitionKeeper = this.getMagikFile().getDefinitionKeeper();
+    // Get method definition(s) to rename, under every package's name for the type.
+    final MagikTypedFile magikFile = this.getMagikFile();
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getOwnMethodDefinitions(typeString);
     final Map<URI, List<TextEdit>> definitionRenames =
-        definitionKeeper.getMethodDefinitions(typeString).stream()
+        methodDefinitions.stream()
             .filter(methodDefinition -> methodDefinition.getMethodName().equals(methodName))
             .map(
                 methodDefinition -> {

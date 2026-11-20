@@ -26,6 +26,43 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class MethodRenamerTest {
 
+  /** {@code method_name()} on {@code sw:a}, once under its own name and once written in user. */
+  private static final String SPELLED_METHOD_CODE =
+      """
+      _package sw
+      def_slotted_exemplar(:a, {})
+      $
+      _method a.method_name()
+      _endmethod
+      $
+      _package user
+      _method a.method_name()
+      _endmethod
+      $
+      _method a.caller()
+        _self.method_name()
+      _endmethod
+      $
+      """;
+
+  private static final String SPELLED_METHOD_RENAMED_CODE =
+      """
+      _package sw
+      def_slotted_exemplar(:a, {})
+      $
+      _method a.new_method_name()
+      _endmethod
+      $
+      _package user
+      _method a.new_method_name()
+      _endmethod
+      $
+      _method a.caller()
+        _self.new_method_name()
+      _endmethod
+      $
+      """;
+
   @RegisterExtension final SmallworldProjectExtension extension = new SmallworldProjectExtension();
 
   @Test
@@ -428,9 +465,32 @@ class MethodRenamerTest {
     assertThat(renamed).isEqualTo(expected);
   }
 
+  @Test
+  void testRenameMethodRenamesDefinitionWrittenInUsingPackage() throws IOException {
+    final Position position = new Position(4, 10); // On `method_name` of sw:a.
+
+    final String renamed = this.renameMethodNameAt(SPELLED_METHOD_CODE, position);
+
+    assertThat(renamed).isEqualTo(SPELLED_METHOD_RENAMED_CODE);
+  }
+
+  @Test
+  void testRenameMethodFromDefinitionWrittenInUsingPackage() throws IOException {
+    final Position position = new Position(8, 10); // On `method_name` of user:a.
+
+    final String renamed = this.renameMethodNameAt(SPELLED_METHOD_CODE, position);
+
+    assertThat(renamed).isEqualTo(SPELLED_METHOD_RENAMED_CODE);
+  }
+
   /** Rename the method at line 3 to {@code new_method_name} and apply the edits to the code. */
   private String renameMethodName(final String code) throws IOException {
     final Position position = new Position(3, 10); // On `method_name`.
+    return this.renameMethodNameAt(code, position);
+  }
+
+  /** As {@link #renameMethodName}, from the given position. */
+  private String renameMethodNameAt(final String code, final Position position) throws IOException {
     final Path path = this.extension.pathOf("/source.magik");
     final MagikTypedFile magikFile = this.extension.addMagikFile(path, code);
     final AstNode topNode = magikFile.getTopNode();

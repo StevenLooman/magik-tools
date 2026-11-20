@@ -192,6 +192,34 @@ class TypeHierarchyProviderTest {
   }
 
   @Test
+  void testGetSubtypesDeclaredWithParentUnderUsingPackagesName() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, subExemplarRef, null));
+    final TypeString spelledExemplarRef = TypeString.ofIdentifier("exemplar", "user");
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null, null, null, null, null, subExemplarRef, spelledExemplarRef));
+
+    final TypeHierarchyItem item =
+        new TypeHierarchyItem(
+            "sw:exemplar",
+            SymbolKind.Class,
+            MagikTypedFile.DEFAULT_URI.toString(),
+            new Range(),
+            new Range());
+    final TypeHierarchyProvider provider = new TypeHierarchyProvider(definitionKeeper);
+    final List<TypeHierarchyItem> subTypes = provider.typeHierarchySubtypes(item);
+    assertThat(subTypes).hasSize(1);
+  }
+
+  @Test
   void testGetSupertypes() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
