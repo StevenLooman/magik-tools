@@ -361,4 +361,40 @@ class MethodExistsTypedCheckTest {
     final MagikTypedCheck check = new MethodExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
+
+  @Test
+  void testSuperSendIsLeftToSuperMethodExists() {
+    final String code =
+        """
+        _package user
+        _method host.run()
+          _super.m()
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = this.createHostWithBase();
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testNamedSuperSendIsLeftToSuperMethodExists() {
+    final String code =
+        """
+        _package user
+        _method host.run()
+          _super(base).m()
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = this.createHostWithBase();
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  private IDefinitionKeeper createHostWithBase() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString hostRef = TypeString.ofIdentifier("host", "user");
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, BASE_REF);
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, hostRef);
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, hostRef, BASE_REF));
+    return definitionKeeper;
+  }
 }

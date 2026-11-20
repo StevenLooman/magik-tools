@@ -1,8 +1,85 @@
 <p>Super method exists</p>
-<h2>Explanation</h2>
-<pre>
+<p>A plain <code>_super.m()</code> is bound, when its method is loaded, to the one direct parent that answers <code>m()</code>. The method fails to load when no parent answers <code>m()</code>, or when two or more parents do.</p>
+<p>When two or more parents answer the method, the send is reported as <code>Too many super implementations of m()</code>. Name the parent to call instead, as in <code>_super(mixin_a).m()</code>; such a send is reported when the named parent does not answer the method.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+def_slotted_exemplar(:parent, {})
+$
+
+_method parent.do_something()
+_endmethod
+$
+
+def_slotted_exemplar(:child, {}, {:parent})
+$
+
 _method child.do_something()
     _super.nonexistent()
 _endmethod
+$
 </pre>
-<p>In the above example, <code>_super.nonexistent()</code> calls a method that does not exist on the parent type. This will result in a runtime error.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+def_slotted_exemplar(:parent, {})
+$
+
+_method parent.do_something()
+_endmethod
+$
+
+def_slotted_exemplar(:child, {}, {:parent})
+$
+
+_method child.do_something()
+    _super.do_something()
+_endmethod
+$
+</pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
+def_mixin(:mixin_a)
+$
+
+_method mixin_a.do_something()
+_endmethod
+$
+
+def_mixin(:mixin_b)
+$
+
+_method mixin_b.do_something()
+_endmethod
+$
+
+def_slotted_exemplar(:child, {}, {:mixin_a, :mixin_b})
+$
+
+_method child.do_something()
+    _super.do_something()
+_endmethod
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="compliant">
+def_mixin(:mixin_a)
+$
+
+_method mixin_a.do_something()
+_endmethod
+$
+
+def_mixin(:mixin_b)
+$
+
+_method mixin_b.do_something()
+_endmethod
+$
+
+def_slotted_exemplar(:child, {}, {:mixin_a, :mixin_b})
+$
+
+_method child.do_something()
+    _super(mixin_a).do_something()
+_endmethod
+$
+</pre>

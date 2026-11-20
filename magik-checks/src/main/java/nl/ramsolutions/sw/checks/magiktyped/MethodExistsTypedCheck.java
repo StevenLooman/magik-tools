@@ -22,6 +22,11 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
 
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
+    // SuperMethodExists tests a send to `_super`.
+    if (this.isSuperSend(node)) {
+      return;
+    }
+
     // Get type.
     final TypeString calledTypeStr = this.getTypeInvokedOn(node);
     if (calledTypeStr.isUndefined()) {
@@ -53,5 +58,13 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
         this.addIssue(issueNode, message);
       }
     }
+  }
+
+  private boolean isSuperSend(final AstNode node) {
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    final AstNode receiverNode = helper.getReceiverNode();
+    return receiverNode != null
+        && receiverNode.is(MagikGrammar.ATOM)
+        && receiverNode.hasDirectChildren(MagikGrammar.SUPER);
   }
 }
